@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     zip \
     unzip \
     nodejs \
@@ -16,8 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install PHP extensions (include both MySQL and PostgreSQL)
+RUN docker-php-ext-install pdo_mysql pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -41,7 +42,8 @@ RUN npm ci && npm run build
 RUN rm -rf node_modules
 
 # Set permissions
-RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -54,37 +56,12 @@ RUN echo '<Directory /var/www/html/public>\n\
     Require all granted\n\
 </Directory>' >> /etc/apache2/apache2.conf
 
-# Expose port (Render will set this)
+# Expose port 80
 EXPOSE 80
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-echo "Starting Thunder Booking..."\n\
-\n\
-# Generate APP_KEY if not set\n\
-if [ -z "$APP_KEY" ]; then\n\
-  echo "Generating APP_KEY..."\n\
-  php artisan key:generate --force\n\
-fi\n\
-\n\
-# Clear and cache config\n\
-php artisan config:clear\n\
-php artisan config:cache\n\
-\n\
-# Run migrations\n\
-echo "Running migrations..."\n\
-php artisan migrate --force\n\
-\n\
-# Cache routes and views\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
-\n\
-# Create storage link\n\
-php artisan storage:link || true\n\
-\n\
-echo "Starting Apache..."\n\
-apache2-foreground' > /start.sh && chmod +x /start.sh
+# Copy startup script
+COPY docker-start.sh /usr/local/bin/start
+RUN chmod +x /usr/local/bin/start
 
 # Start Apache
-CMD ["/start.sh"]
+CMD ["/usr/local/bin/start"]
