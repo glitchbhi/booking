@@ -41,10 +41,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('welcome')->with('success', 'Welcome to Thunder Booking! Your account has been created successfully.');
+        return redirect()->route('verification.notice')->with('success', 'Welcome! Please verify your email address to continue.');
     }
 }

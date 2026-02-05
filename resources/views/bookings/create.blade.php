@@ -56,9 +56,22 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
                                     <select name="start_time" id="startTime" required class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm sm:text-base">
                                         <option value="">Select time</option>
+                                        @php
+                                            $now = \Carbon\Carbon::now();
+                                            $bookingDate = request('date') ? \Carbon\Carbon::parse(request('date')) : $now;
+                                            $isToday = $bookingDate->isToday();
+                                        @endphp
                                         @for($h = 6; $h <= 22; $h++)
                                             @foreach(['00', '30'] as $m)
-                                                <option value="{{ sprintf('%02d:%s', $h, $m) }}">{{ date('g:i A', strtotime("$h:$m")) }}</option>
+                                                @php
+                                                    $timeSlot = sprintf('%02d:%s', $h, $m);
+                                                    $slotTime = $bookingDate->copy()->setTimeFromTimeString($timeSlot);
+                                                    // Skip if slot is in past or within 5 minutes from now
+                                                    if ($isToday && $slotTime->lessThan($now->copy()->addMinutes(5))) {
+                                                        continue;
+                                                    }
+                                                @endphp
+                                                <option value="{{ $timeSlot }}">{{ date('g:i A', strtotime("$h:$m")) }}</option>
                                             @endforeach
                                         @endfor
                                     </select>
