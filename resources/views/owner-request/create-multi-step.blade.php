@@ -139,9 +139,9 @@
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Price (per hour) *</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-3.5 text-gray-500">BTN</span>
+                                    <span class="absolute left-4 top-3.5 text-gray-500 font-medium">BTN</span>
                                     <input type="number" name="price_day" id="price_day" required min="0" step="0.01"
-                                           class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                           class="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                            placeholder="500.00"
                                            value="{{ old('price_day') }}">
                                 </div>
@@ -179,9 +179,9 @@
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Price (per hour)</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-3.5 text-gray-500">BTN</span>
+                                    <span class="absolute left-4 top-3.5 text-gray-500 font-medium">BTN</span>
                                     <input type="number" name="price_night" id="price_night" min="0" step="0.01"
-                                           class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                           class="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                            placeholder="700.00"
                                            value="{{ old('price_night') }}">
                                 </div>
