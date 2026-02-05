@@ -35,6 +35,14 @@ su -s /bin/bash www-data -c "php artisan cache:clear" || true
 su -s /bin/bash www-data -c "php artisan view:clear" || true
 su -s /bin/bash www-data -c "php artisan route:clear" || true
 
+# Debug: Check if Google OAuth vars are set
+echo "Checking Google OAuth environment variables..."
+if [ -z "$GOOGLE_CLIENT_ID" ]; then
+  echo "WARNING: GOOGLE_CLIENT_ID is not set!"
+else
+  echo "GOOGLE_CLIENT_ID is set"
+fi
+
 echo "Running migrations..."
 su -s /bin/bash www-data -c "php artisan migrate --force --no-interaction" || echo "Migration warning: Check database connection"
 
