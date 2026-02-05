@@ -74,13 +74,20 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Revenue chart data
-        $dailyRevenue = Booking::whereIn('status', ['completed'])
+        // Revenue chart data - database agnostic
+        $revenueBookings = Booking::whereIn('status', ['completed'])
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as revenue'), DB::raw('SUM(admin_commission) as commission'))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            ->get(['created_at', 'total_amount', 'admin_commission']);
+        
+        $dailyRevenue = $revenueBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->created_at)->format('Y-m-d');
+        })->map(function($group, $date) {
+            return (object)[
+                'date' => $date,
+                'revenue' => $group->sum('total_amount'),
+                'commission' => $group->sum('admin_commission')
+            ];
+        })->sortBy('date')->values();
 
         // Recent bookings
         $recentBookings = Booking::with(['user', 'ground'])

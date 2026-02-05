@@ -49,23 +49,34 @@ class OwnerDashboardController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        // Peak hours analysis
-        $peakHours = Booking::whereIn('ground_id', $groundIds)
+        // Peak hours analysis - database agnostic
+        $bookingsForPeakHours = Booking::whereIn('ground_id', $groundIds)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('HOUR(start_time) as hour'), DB::raw('COUNT(*) as bookings'))
-            ->groupBy('hour')
-            ->orderBy('bookings', 'desc')
-            ->limit(8)
-            ->get();
+            ->get(['start_time']);
+        
+        $peakHours = $bookingsForPeakHours->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->start_time)->format('H');
+        })->map(function($group) {
+            return (object)[
+                'hour' => $group->first() ? \Carbon\Carbon::parse($group->first()->start_time)->format('H') : 0,
+                'bookings' => $group->count()
+            ];
+        })->sortByDesc('bookings')->take(8)->values();
 
-        // Daily revenue chart data (last 7 days)
-        $dailyRevenue = Booking::whereIn('ground_id', $groundIds)
+        // Daily revenue chart data (last 7 days) - database agnostic
+        $revenueBookings = Booking::whereIn('ground_id', $groundIds)
             ->whereIn('status', ['completed'])
             ->whereBetween('created_at', [now()->subDays(7), now()])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            ->get(['created_at', 'total_amount']);
+        
+        $dailyRevenue = $revenueBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->created_at)->format('Y-m-d');
+        })->map(function($group, $date) {
+            return (object)[
+                'date' => $date,
+                'total' => $group->sum('total_amount')
+            ];
+        })->sortBy('date')->values();
 
         // Top performing grounds
         $topGrounds = Auth::user()->grounds()
