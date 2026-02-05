@@ -49,6 +49,9 @@ su -s /bin/bash www-data -c "php artisan migrate --force --no-interaction" || ec
 echo "Seeding database..."
 su -s /bin/bash www-data -c "php artisan db:seed --force --no-interaction" || echo "Seeding skipped"
 
+echo "Fixing approved owners..."
+su -s /bin/bash www-data -c "php artisan fix:approved-owners --no-interaction" || echo "Fix skipped"
+
 # DO NOT cache config in production - it prevents environment variables from being read
 echo "Configuration will use environment variables directly..."
 
