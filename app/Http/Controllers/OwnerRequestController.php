@@ -82,7 +82,7 @@ class OwnerRequestController extends Controller
 
             return redirect()
                 ->route('welcome')
-                ->with('success', 'Owner request submitted successfully! You will receive an email notification once reviewed.');
+                ->with('success', 'Successfully added! Waiting for admin approval. You will receive an email notification once reviewed.');
 
         } catch (\Exception $e) {
             return back()
