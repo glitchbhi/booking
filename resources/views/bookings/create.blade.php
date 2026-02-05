@@ -264,10 +264,11 @@
         const dayRate = {{ $ground->rate_per_hour }};
         const nightRate = {{ $ground->night_rate_per_hour ?? $ground->rate_per_hour }};
         
-        let totalHours, subtotal, discount = 0, baseAmount;
+        let totalHours, subtotal, discount = 0, baseAmount, currentRate;
         
         if (isFullDay) {
             totalHours = 17;
+            currentRate = dayRate;
             subtotal = totalHours * dayRate;
             // Apply 10% discount for full-day bookings
             discount = subtotal * 0.10;
@@ -280,10 +281,11 @@
             const startTime = document.getElementById('startTime').value;
             if (startTime) {
                 const hour = parseInt(startTime.split(':')[0]);
-                // Day rate: 6 AM - 6 PM (6-18), Night rate: 6 PM - 11 PM (18-23)
-                const rate = hour >= 18 ? nightRate : dayRate;
-                subtotal = totalHours * rate;
+                // Day rate: 6 AM - 6 PM (6-17), Night rate: 6 PM onwards (18-23)
+                currentRate = hour >= 18 ? nightRate : dayRate;
+                subtotal = totalHours * currentRate;
             } else {
+                currentRate = dayRate;
                 subtotal = totalHours * dayRate;
             }
             baseAmount = subtotal;
@@ -296,7 +298,7 @@
         const totalAmount = baseAmount + platformFee;
         
         document.getElementById('totalHours').textContent = totalHours.toFixed(1);
-        document.getElementById('rateDisplay').textContent = isFullDay ? dayRate.toFixed(0) : (baseAmount / totalHours).toFixed(0);
+        document.getElementById('rateDisplay').textContent = currentRate.toFixed(0);
         document.getElementById('subtotal').textContent = subtotal.toFixed(0);
         document.getElementById('discount').textContent = discount.toFixed(0);
         document.getElementById('baseAmount').textContent = baseAmount.toFixed(0);

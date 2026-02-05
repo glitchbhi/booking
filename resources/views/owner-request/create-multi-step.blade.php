@@ -613,10 +613,8 @@ function toggleGroundSize() {
     const container = document.getElementById('groundSizeContainer');
     const teamSizeInput = document.getElementById('team_size');
     
-    // Sports that require team size
-    const sportsRequiringSize = ['Football', 'Cricket', 'Hockey', 'Basketball', 'Volleyball', 'Tennis', 'Badminton', 'Rugby'];
-    
-    if (category && sportsRequiringSize.includes(category)) {
+    // Only Football requires team size (for 5-a-side, 7-a-side, etc.)
+    if (category === 'Football') {
         container.classList.remove('hidden');
         teamSizeInput.required = true;
     } else {
