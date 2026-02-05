@@ -9,7 +9,8 @@
 ### 1. Prepare Your Repository
 Ensure these files are in your repository:
 - `render.yaml` (build configuration)
-- `build.sh` (build script)
+- `Dockerfile` (Docker configuration for PHP)
+- `build.sh` (build script - optional with Docker)
 - `composer.json` and `composer.lock`
 - `package.json` and `package-lock.json`
 
@@ -36,8 +37,7 @@ Ensure these files are in your repository:
    - **Name**: thunder-booking
    - **Region**: Same as database
    - **Branch**: main (or your default branch)
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `php artisan serve --host=0.0.0.0 --port=$PORT`
+   - **Runtime**: Docker (automatically detected from Dockerfile)
    - **Plan**: Free or paid
 
 ### 5. Set Environment Variables
@@ -66,12 +66,11 @@ In the Render dashboard, go to "Environment" tab and add:
 - `MAIL_FROM_ADDRESS` = your-email@gmail.com
 - `MAIL_FROM_NAME` = Thunder Booking
 
-### 6. Make build.sh Executable
-Run locally before pushing:
+### 6. Push Your Code
+Commit and push all files:
 ```bash
-chmod +x build.sh
-git add build.sh
-git commit -m "Make build script executable"
+git add Dockerfile render.yaml
+git commit -m "Add Docker configuration for Render deployment"
 git push
 ```
 
