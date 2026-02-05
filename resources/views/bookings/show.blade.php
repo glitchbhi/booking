@@ -53,7 +53,7 @@
             <div class="space-y-2">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Rate per Hour:</span>
-                    <span class="font-semibold">{{ number_format($booking->ground->rate_per_hour, 2) }}</span>
+                    <span class="font-semibold">BTN {{ number_format($booking->ground->rate_per_hour, 2) }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Duration:</span>
@@ -61,12 +61,12 @@
                 </div>
                 <div class="flex justify-between text-lg font-bold">
                     <span>Total Amount:</span>
-                    <span class="text-indigo-600">{{ number_format($booking->total_amount, 2) }}</span>
+                    <span class="text-indigo-600">BTN {{ number_format($booking->total_amount, 2) }}</span>
                 </div>
                 @if($booking->status === 'cancelled' && $booking->refund_amount > 0)
                     <div class="flex justify-between text-green-600">
                         <span>Refund Amount:</span>
-                        <span class="font-bold">{{ number_format($booking->refund_amount, 2) }}</span>
+                        <span class="font-bold">BTN {{ number_format($booking->refund_amount, 2) }}</span>
                     </div>
                 @endif
             </div>

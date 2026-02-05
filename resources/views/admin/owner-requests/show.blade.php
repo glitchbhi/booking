@@ -63,7 +63,7 @@
                         <p class="text-gray-900 font-medium">
                             <i class="fas fa-sun mr-1 text-yellow-500"></i>
                             {{ date('g:i A', strtotime($ownerRequest->day_time_start ?? '06:00:00')) }} onwards - 
-                            {{ number_format($ownerRequest->price_day, 2) }}/hour
+                            BTN {{ number_format($ownerRequest->price_day, 2) }}/hour
                         </p>
                     </div>
                     @if($ownerRequest->available_at_night)
@@ -72,7 +72,7 @@
                             <p class="text-gray-900 font-medium">
                                 <i class="fas fa-moon mr-1 text-indigo-500"></i>
                                 {{ date('g:i A', strtotime($ownerRequest->night_time_start ?? '18:00:00')) }} onwards - 
-                                {{ number_format($ownerRequest->price_night, 2) }}/hour
+                                BTN {{ number_format($ownerRequest->price_night, 2) }}/hour
                             </p>
                         </div>
                         <div>

@@ -61,7 +61,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-bold text-green-600">{{ number_format($bookings->sum('total_amount'), 0) }}</p>
+                    <p class="text-2xl font-bold text-green-600">BTN {{ number_format($bookings->sum('total_amount'), 0) }}</p>
                 </div>
                 <i class="fas fa-coins text-yellow-500 text-3xl"></i>
             </div>

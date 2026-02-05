@@ -37,9 +37,9 @@
                     @if($ground->address)
                         <p class="text-gray-600"><strong>Address:</strong> {{ $ground->address }}</p>
                     @endif
-                    <p class="text-gray-600"><strong>Day Rate:</strong> {{ number_format($ground->rate_per_hour, 2) }} per hour</p>
+                    <p class="text-gray-600"><strong>Day Rate:</strong> BTN {{ number_format($ground->rate_per_hour, 2) }} per hour</p>
                     @if($ground->night_rate_per_hour)
-                        <p class="text-gray-600"><strong>Night Rate:</strong> {{ number_format($ground->night_rate_per_hour, 2) }} per hour</p>
+                        <p class="text-gray-600"><strong>Night Rate:</strong> BTN {{ number_format($ground->night_rate_per_hour, 2) }} per hour</p>
                     @endif
                     @if($ground->description)
                         <p class="text-gray-600"><strong>Description:</strong> {{ $ground->description }}</p>

@@ -23,7 +23,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="bg-gray-50 rounded-md p-4">
                 <p class="text-sm text-gray-600">Wallet Balance</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($user->wallet_balance, 2) }}</p>
+                <p class="text-2xl font-bold text-gray-900">BTN {{ number_format($user->wallet_balance, 2) }}</p>
             </div>
             <div class="bg-gray-50 rounded-md p-4">
                 <p class="text-sm text-gray-600">Total Bookings</p>
@@ -88,7 +88,7 @@
                             <p class="text-xs text-gray-500">{{ $booking->start_time->format('M d, Y') }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-semibold text-gray-900">{{ number_format($booking->total_amount, 2) }}</p>
+                            <p class="text-sm font-semibold text-gray-900">BTN {{ number_format($booking->total_amount, 2) }}</p>
                             <span class="px-2 py-1 text-xs rounded-full
                                 {{ $booking->status === 'booked' ? 'bg-blue-100 text-blue-800' : '' }}
                                 {{ $booking->status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}

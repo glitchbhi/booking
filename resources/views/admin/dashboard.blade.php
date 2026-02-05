@@ -12,7 +12,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($totalRevenue, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">BTN {{ number_format($totalRevenue, 2) }}</p>
                 </div>
                 <i class="fas fa-rupee-sign text-green-500 text-3xl"></i>
             </div>
@@ -22,7 +22,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Admin Commission</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($adminCommission, 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-900">BTN {{ number_format($adminCommission, 2) }}</p>
                 </div>
                 <i class="fas fa-coins text-yellow-500 text-3xl"></i>
             </div>
@@ -170,7 +170,7 @@
                         </div>
                         <div class="text-right">
                             <p class="font-semibold text-gray-900">{{ $ground->bookings_count }} bookings</p>
-                            <p class="text-xs text-gray-500">{{ number_format($ground->revenue ?? 0, 2) }}</p>
+                            <p class="text-xs text-gray-500">BTN {{ number_format($ground->revenue ?? 0, 2) }}</p>
                         </div>
                     </div>
                 @endforeach
@@ -193,7 +193,7 @@
                             <p class="text-xs text-gray-500">{{ $booking->user->name }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-semibold text-gray-900">{{ number_format($booking->total_amount, 2) }}</p>
+                            <p class="text-sm font-semibold text-gray-900">BTN {{ number_format($booking->total_amount, 2) }}</p>
                             <p class="text-xs text-gray-500">{{ $booking->created_at->diffForHumans() }}</p>
                         </div>
                     </div>
