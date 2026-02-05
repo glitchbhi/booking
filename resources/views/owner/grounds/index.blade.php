@@ -55,7 +55,7 @@
                         
                         <div class="flex items-center justify-between mt-3 pb-3 border-b">
                             <div>
-                                <span class="text-2xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 2) }}</span>
+                                <span class="text-2xl font-bold text-gray-900">{{ number_format($ground->rate_per_hour, 2) }}</span>
                                 <span class="text-sm text-gray-600">/hour</span>
                             </div>
                             <div>

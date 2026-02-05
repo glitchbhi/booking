@@ -14,7 +14,7 @@
                     <p class="text-gray-600"><strong>Owner:</strong> {{ $ground->owner->name }} ({{ $ground->owner->email }})</p>
                     <p class="text-gray-600"><strong>Sport:</strong> {{ $ground->sportType->name }}</p>
                     <p class="text-gray-600"><strong>Location:</strong> {{ $ground->location }}</p>
-                    <p class="text-gray-600"><strong>Rate:</strong> BTN {{ number_format($ground->rate_per_hour, 2) }} per hour</p>
+                    <p class="text-gray-600"><strong>Rate:</strong> {{ number_format($ground->rate_per_hour, 2) }} per hour</p>
                     <p class="text-gray-600"><strong>Status:</strong> 
                         <span class="px-2 py-1 text-xs rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             {{ $ground->is_active ? 'Active' : 'Inactive' }}

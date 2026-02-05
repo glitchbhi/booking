@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <title>Thunder Booking - Find & Book Sports Facilities in Bhutan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -272,7 +273,7 @@
                             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <div class="flex-1">
                                     <span class="text-xs text-gray-500">Starting at</span>
-                                    <p class="text-green-600 font-bold text-lg 2xl:text-xl">BTN {{ number_format($ground->rate_per_hour) }} <span class="text-sm font-normal text-gray-500">/ hr</span></p>
+                                    <p class="text-green-600 font-bold text-lg 2xl:text-xl">{{ number_format($ground->rate_per_hour) }} <span class="text-sm font-normal text-gray-500">/ hr</span></p>
                                     @if($ground->total_reviews > 0)
                                         <div class="flex items-center mt-1">
                                             <div class="flex text-yellow-400 text-xs">

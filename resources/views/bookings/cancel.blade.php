@@ -35,7 +35,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Amount:</span>
-                    <span class="font-medium text-gray-900">BTN {{ number_format($booking->total_amount, 2) }}</span>
+                    <span class="font-medium text-gray-900">{{ number_format($booking->total_amount, 2) }}</span>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <div>
                     <h4 class="font-semibold text-blue-900">Refund Policy</h4>
                     <p class="text-sm text-blue-800 mt-1">
-                        If you cancel this booking, <strong>BTN {{ number_format($booking->total_amount, 2) }}</strong> will be refunded to your wallet balance.
+                        If you cancel this booking, <strong>{{ number_format($booking->total_amount, 2) }}</strong> will be refunded to your wallet balance.
                     </p>
                 </div>
             </div>

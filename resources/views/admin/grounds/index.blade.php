@@ -77,7 +77,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $ground->owner->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $ground->sportType->name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ Str::limit($ground->location, 20) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">BTN {{ number_format($ground->rate_per_hour, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ number_format($ground->rate_per_hour, 2) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $ground->total_bookings }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                 <i class="fas fa-star text-yellow-400"></i> {{ number_format($ground->average_rating, 1) }}

@@ -66,7 +66,7 @@
         <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
             <div>
                 <span class="text-xs text-gray-500 block">Starting at</span>
-                <span class="text-xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</span>
+                <span class="text-xl font-bold text-gray-900">{{ number_format($ground->rate_per_hour, 0) }}</span>
                 <span class="text-sm text-gray-500">/hr</span>
             </div>
             <span class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">

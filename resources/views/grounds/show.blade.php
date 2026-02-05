@@ -237,7 +237,7 @@
                             </div>
                         </div>
                         <div class="text-2xl font-bold text-gray-900">
-                            BTN {{ number_format($ground->rate_per_hour, 0) }}
+                            {{ number_format($ground->rate_per_hour, 0) }}
                             <span class="text-sm font-normal text-gray-500">/ hour</span>
                         </div>
                     </div>
@@ -258,7 +258,7 @@
                                 </div>
                             </div>
                             <div class="text-2xl font-bold text-gray-900">
-                                BTN {{ number_format($ground->night_rate_per_hour, 0) }}
+                                {{ number_format($ground->night_rate_per_hour, 0) }}
                                 <span class="text-sm font-normal text-gray-500">/ hour</span>
                             </div>
                         </div>
@@ -412,7 +412,7 @@
             <div class="bg-white rounded-2xl shadow-lg p-6">
                 <div class="text-center mb-4">
                     <div class="text-sm text-gray-500 mb-1">Starting from</div>
-                    <div class="text-3xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
+                    <div class="text-3xl font-bold text-gray-900">{{ number_format($ground->rate_per_hour, 0) }}</div>
                     <div class="text-sm text-gray-500">per hour</div>
                 </div>
                 

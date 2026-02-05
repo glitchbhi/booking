@@ -20,7 +20,6 @@ class HomeController extends Controller
         $popularGrounds = Ground::with('sportType')
             ->where('is_active', true)
             ->orderBy('total_bookings', 'desc')
-            ->take(6)
             ->get();
 
         return view('welcome', compact('sportsTypes', 'popularGrounds'));

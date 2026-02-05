@@ -7,6 +7,23 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Request to Become a Ground Owner</h1>
         
+        @if($errors->any())
+            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <h3 class="font-semibold text-red-900 mb-2">Please fix the following errors:</h3>
+                <ul class="list-disc list-inside text-red-800 space-y-1 text-sm">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <p class="text-red-800">{{ session('error') }}</p>
+            </div>
+        @endif
+        
         <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
             <h3 class="font-semibold text-blue-900 mb-2">Benefits of Becoming an Owner</h3>
             <ul class="list-disc list-inside text-blue-800 space-y-1 text-sm">

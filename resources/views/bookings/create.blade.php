@@ -18,9 +18,9 @@
                         <div class="bg-gray-50 rounded-md p-3 sm:p-4 space-y-1 text-sm sm:text-base">
                             <p class="text-gray-600"><strong>Location:</strong> {{ $ground->location }}</p>
                             <p class="text-gray-600"><strong>Sport:</strong> {{ $ground->sportType->name }}</p>
-                            <p class="text-gray-600"><strong>Day Rate:</strong> BTN {{ number_format($ground->rate_per_hour, 0) }} per hour</p>
+                            <p class="text-gray-600"><strong>Day Rate:</strong> {{ number_format($ground->rate_per_hour, 0) }} per hour</p>
                             @if($ground->night_rate_per_hour)
-                                <p class="text-gray-600"><strong>Night Rate:</strong> BTN {{ number_format($ground->night_rate_per_hour, 0) }} per hour</p>
+                                <p class="text-gray-600"><strong>Night Rate:</strong> {{ number_format($ground->night_rate_per_hour, 0) }} per hour</p>
                             @endif
                         </div>
                     </div>
@@ -119,12 +119,12 @@
                             <h3 class="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Booking Summary</h3>
                             <div class="space-y-1 text-gray-600 text-xs sm:text-sm">
                                 <p><strong>Total Hours:</strong> <span id="totalHours">1</span></p>
-                                <p><strong>Rate per Hour:</strong> BTN <span id="rateDisplay">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
-                                <p><strong>Subtotal:</strong> BTN <span id="subtotal">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
-                                <p id="discountRow" style="display:none;" class="text-green-700"><strong>Full Day Discount (10%):</strong> - BTN <span id="discount">0</span></p>
-                                <p><strong>Base Amount:</strong> BTN <span id="baseAmount">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
-                                <p><strong>Platform Fee (3%):</strong> BTN <span id="platformFee">{{ number_format($ground->rate_per_hour * 0.03, 0) }}</span></p>
-                                <p class="text-base sm:text-lg font-bold text-green-600 pt-2 border-t border-green-200 mt-2"><strong>Total Amount:</strong> BTN <span id="totalAmount">{{ number_format($ground->rate_per_hour * 1.03, 0) }}</span></p>
+                                <p><strong>Rate per Hour:</strong> <span id="rateDisplay">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
+                                <p><strong>Subtotal:</strong> <span id="subtotal">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
+                                <p id="discountRow" style="display:none;" class="text-green-700"><strong>Full Day Discount (10%):</strong> - <span id="discount">0</span></p>
+                                <p><strong>Base Amount:</strong> <span id="baseAmount">{{ number_format($ground->rate_per_hour, 0) }}</span></p>
+                                <p><strong>Platform Fee (3%):</strong> <span id="platformFee">{{ number_format($ground->rate_per_hour * 0.03, 0) }}</span></p>
+                                <p class="text-base sm:text-lg font-bold text-green-600 pt-2 border-t border-green-200 mt-2"><strong>Total Amount:</strong> <span id="totalAmount">{{ number_format($ground->rate_per_hour * 1.03, 0) }}</span></p>
                             </div>
                         </div>
 
@@ -138,7 +138,7 @@
 
                         <div class="bg-gray-50 rounded-md p-3 sm:p-4">
                             <p class="text-xs sm:text-sm text-gray-600">
-                                <i class="fas fa-wallet"></i> <strong>Your Wallet Balance:</strong> BTN {{ number_format(auth()->user()->wallet_balance, 0) }}
+                                <i class="fas fa-wallet"></i> <strong>Your Wallet Balance:</strong> {{ number_format(auth()->user()->wallet_balance, 0) }}
                             </p>
                             @if(auth()->user()->wallet_balance < $ground->rate_per_hour)
                                 <p class="text-xs sm:text-sm text-red-600 mt-2">

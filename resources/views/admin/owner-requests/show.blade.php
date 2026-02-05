@@ -63,7 +63,7 @@
                         <p class="text-gray-900 font-medium">
                             <i class="fas fa-sun mr-1 text-yellow-500"></i>
                             {{ date('g:i A', strtotime($ownerRequest->day_time_start ?? '06:00:00')) }} onwards - 
-                            ₹{{ number_format($ownerRequest->price_day, 2) }}/hour
+                            {{ number_format($ownerRequest->price_day, 2) }}/hour
                         </p>
                     </div>
                     @if($ownerRequest->available_at_night)
@@ -72,7 +72,7 @@
                             <p class="text-gray-900 font-medium">
                                 <i class="fas fa-moon mr-1 text-indigo-500"></i>
                                 {{ date('g:i A', strtotime($ownerRequest->night_time_start ?? '18:00:00')) }} onwards - 
-                                ₹{{ number_format($ownerRequest->price_night, 2) }}/hour
+                                {{ number_format($ownerRequest->price_night, 2) }}/hour
                             </p>
                         </div>
                         <div>
@@ -160,8 +160,8 @@
         @if($ownerRequest->status === 'pending')
             <div class="border-t pt-6 mt-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Take Action</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <form action="{{ route('admin.owner-requests.approve', $ownerRequest) }}" method="POST">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <form action="{{ route('admin.owner-requests.approve', $ownerRequest) }}" method="POST" class="flex-1">
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Admin Notes (Optional)</label>
@@ -169,11 +169,11 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md"
                                       placeholder="Add notes for the user..."></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 font-semibold">
+                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 font-semibold transition-colors">
                             <i class="fas fa-check"></i> Approve Request
                         </button>
                     </form>
-                    <form action="{{ route('admin.owner-requests.reject', $ownerRequest) }}" method="POST">
+                    <form action="{{ route('admin.owner-requests.reject', $ownerRequest) }}" method="POST" class="flex-1">
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason (Optional)</label>
@@ -181,7 +181,7 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md"
                                       placeholder="Explain why the request is rejected..."></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-md hover:bg-red-700 font-semibold">
+                        <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-md hover:bg-red-700 font-semibold transition-colors">
                             <i class="fas fa-times"></i> Reject Request
                         </button>
                     </form>
