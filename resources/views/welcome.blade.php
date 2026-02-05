@@ -186,13 +186,15 @@
                 @php
                     $sportIcons = [
                         'Football' => 'fa-futbol',
-                        'Cricket' => 'fa-cricket-bat-ball',
-                        'Badminton' => 'fa-shuttlecock',
+                        'Cricket' => 'fa-baseball-bat-ball',
+                        'Badminton' => 'fa-table-tennis-paddle-ball',
                         'Tennis' => 'fa-table-tennis-paddle-ball',
                         'Basketball' => 'fa-basketball',
                         'Archery' => 'fa-bullseye',
                         'Khuru' => 'fa-bullseye',
                         'Swimming' => 'fa-person-swimming',
+                        'Volleyball' => 'fa-volleyball',
+                        'Table Tennis' => 'fa-table-tennis-paddle-ball',
                     ];
                 @endphp
                 @foreach($sportsTypes->take(6) as $sport)
