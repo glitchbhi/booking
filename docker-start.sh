@@ -38,10 +38,8 @@ su -s /bin/bash www-data -c "php artisan route:clear" || true
 echo "Running migrations..."
 su -s /bin/bash www-data -c "php artisan migrate --force --no-interaction" || echo "Migration warning: Check database connection"
 
-echo "Caching configuration..."
-su -s /bin/bash www-data -c "php artisan config:cache" || true
-su -s /bin/bash www-data -c "php artisan route:cache" || true
-su -s /bin/bash www-data -c "php artisan view:cache" || true
+# DO NOT cache config in production - it prevents environment variables from being read
+echo "Configuration will use environment variables directly..."
 
 echo "Creating storage link..."
 su -s /bin/bash www-data -c "php artisan storage:link" || true
