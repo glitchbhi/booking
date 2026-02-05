@@ -41,16 +41,18 @@ Ensure these files are in your repository:
    - **Plan**: Free or paid
 
 ### 5. Set Environment Variables
-In the Render dashboard, go to "Environment" tab and add:
+In the Render dashboard, go to "Environment" tab and add these variables.
+
+**IMPORTANT: Do NOT edit the .env file - all configuration is done through Render's dashboard!**
 
 **Required:**
 - `APP_NAME` = Thunder Booking
 - `APP_ENV` = production
 - `APP_DEBUG` = false
-- `APP_KEY` = base64:YOUR_KEY_HERE (Generate locally: `php artisan key:generate --show`, or leave empty - will auto-generate)
+- `APP_KEY` = (Leave empty - will auto-generate on first deploy)
 - `APP_TIMEZONE` = Asia/Thimphu
-- `APP_URL` = https://your-app-name.onrender.com
-- `DATABASE_URL` = (Copy from PostgreSQL connection string from Render dashboard)
+- `APP_URL` = https://thunderbooking.onrender.com (or your custom URL)
+- `DATABASE_URL` = (Automatically set if you linked the PostgreSQL database in render.yaml)
 
 **Session & Cache:**
 - `SESSION_DRIVER` = file
