@@ -22,15 +22,15 @@ class DatabaseSeeder extends Seeder
         // Create admin user
         $admin = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@thunderbooking.bt',
-            'password' => Hash::make('password'),
+            'email' => 'thunderbooking975@gmail.com',
+            'password' => Hash::make('Thunder@booking123'),
             'role' => 'admin',
             'owner_status' => 'none',
             'wallet_balance' => 0,
             'email_verified_at' => now(),
         ]);
 
-        echo "✓ Admin user created (admin@thunderbooking.bt / password)\n";
+        echo "✓ Admin user created (thunderbooking975@gmail.com / Thunder@booking123)\n";
 
         // Create sports types
         $sports = [
