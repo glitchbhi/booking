@@ -46,6 +46,9 @@ fi
 echo "Running migrations..."
 su -s /bin/bash www-data -c "php artisan migrate --force --no-interaction" || echo "Migration warning: Check database connection"
 
+echo "Seeding database..."
+su -s /bin/bash www-data -c "php artisan db:seed --force --no-interaction" || echo "Seeding skipped"
+
 # DO NOT cache config in production - it prevents environment variables from being read
 echo "Configuration will use environment variables directly..."
 
