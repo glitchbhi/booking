@@ -29,7 +29,7 @@ class OwnerRequestController extends Controller
     {
         $validated = $request->validate([
             'ground_name' => 'required|string|max:255',
-            'license_number' => 'required|string|max:255',
+            'license_number' => 'required|string|max:255|unique:owner_requests,license_number',
             'category' => 'required|string|max:255',
             'team_size' => 'nullable|integer|min:5|max:11',
             'day_time_start' => 'required|date_format:H:i',
