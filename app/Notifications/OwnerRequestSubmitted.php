@@ -34,9 +34,9 @@ class OwnerRequestSubmitted extends Notification implements ShouldQueue
             ->line('• Contact: ' . $this->ownerRequest->contact_number)
             ->line('')
             ->line('**Pricing:**')
-            ->line('• Day Time: ₹' . number_format($this->ownerRequest->price_day, 2) . ' per hour')
+            ->line('• Day Time: BTN' . number_format($this->ownerRequest->price_day, 2) . ' per hour')
             ->when($this->ownerRequest->available_at_night, function ($message) {
-                return $message->line('• Night Time: ₹' . number_format($this->ownerRequest->price_night, 2) . ' per hour');
+                return $message->line('• Night Time: BTN' . number_format($this->ownerRequest->price_night, 2) . ' per hour');
             })
             ->line('')
             ->line('Your request is currently being reviewed by our admin team.')

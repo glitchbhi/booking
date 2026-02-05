@@ -139,7 +139,7 @@
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Price (per hour) *</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-3.5 text-gray-500">₹</span>
+                                    <span class="absolute left-4 top-3.5 text-gray-500">BTN</span>
                                     <input type="number" name="price_day" id="price_day" required min="0" step="0.01"
                                            class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                            placeholder="500.00"
@@ -179,7 +179,7 @@
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Price (per hour)</label>
                                 <div class="relative">
-                                    <span class="absolute left-4 top-3.5 text-gray-500">₹</span>
+                                    <span class="absolute left-4 top-3.5 text-gray-500">BTN</span>
                                     <input type="number" name="price_night" id="price_night" min="0" step="0.01"
                                            class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                            placeholder="700.00"
@@ -583,7 +583,7 @@ function updatePricingPreview() {
     const nightPreview = document.getElementById('nightPricePreview');
     
     if (dayStart && dayPrice) {
-        dayPreview.textContent = `• Day Time: ${formatTime(dayStart)} onwards - ₹${parseFloat(dayPrice).toFixed(2)}/hour`;
+        dayPreview.textContent = `• Day Time: ${formatTime(dayStart)} onwards - BTN${parseFloat(dayPrice).toFixed(2)}/hour`;
     } else {
         dayPreview.textContent = '• Day Time: Set your pricing above';
     }
@@ -591,7 +591,7 @@ function updatePricingPreview() {
     if (availableAtNight) {
         nightPreview.classList.remove('hidden');
         if (nightStart && nightPrice) {
-            nightPreview.textContent = `• Night Time: ${formatTime(nightStart)} onwards - ₹${parseFloat(nightPrice).toFixed(2)}/hour`;
+            nightPreview.textContent = `• Night Time: ${formatTime(nightStart)} onwards - BTN${parseFloat(nightPrice).toFixed(2)}/hour`;
         } else {
             nightPreview.textContent = '• Night Time: Set your pricing above';
         }
