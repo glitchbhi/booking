@@ -59,11 +59,31 @@ EXPOSE 80
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Thunder Booking..."\n\
+\n\
+# Generate APP_KEY if not set\n\
+if [ -z "$APP_KEY" ]; then\n\
+  echo "Generating APP_KEY..."\n\
+  php artisan key:generate --force\n\
+fi\n\
+\n\
+# Clear and cache config\n\
+php artisan config:clear\n\
 php artisan config:cache\n\
+\n\
+# Run migrations\n\
+echo "Running migrations..."\n\
+php artisan migrate --force\n\
+\n\
+# Cache routes and views\n\
 php artisan route:cache\n\
 php artisan view:cache\n\
-php artisan migrate --force\n\
-php artisan storage:link\n\
+\n\
+# Create storage link\n\
+php artisan storage:link || true\n\
+\n\
+echo "Starting Apache..."\n\
 apache2-foreground' > /start.sh && chmod +x /start.sh
 
 # Start Apache

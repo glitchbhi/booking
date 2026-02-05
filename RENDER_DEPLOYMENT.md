@@ -47,16 +47,18 @@ In the Render dashboard, go to "Environment" tab and add:
 - `APP_NAME` = Thunder Booking
 - `APP_ENV` = production
 - `APP_DEBUG` = false
-- `APP_KEY` = (Generate using: `php artisan key:generate --show`)
+- `APP_KEY` = base64:YOUR_KEY_HERE (Generate locally: `php artisan key:generate --show`, or leave empty - will auto-generate)
+- `APP_TIMEZONE` = Asia/Thimphu
 - `APP_URL` = https://your-app-name.onrender.com
-- `DATABASE_URL` = (Copy from database connection string)
+- `DATABASE_URL` = (Copy from PostgreSQL connection string from Render dashboard)
 
 **Session & Cache:**
 - `SESSION_DRIVER` = file
 - `CACHE_DRIVER` = file
 - `QUEUE_CONNECTION` = sync
+- `LOG_CHANNEL` = errorlog
 
-**Mail (Gmail example):**
+**Mail (Gmail example - Optional):**
 - `MAIL_MAILER` = smtp
 - `MAIL_HOST` = smtp.gmail.com
 - `MAIL_PORT` = 587
@@ -65,6 +67,11 @@ In the Render dashboard, go to "Environment" tab and add:
 - `MAIL_ENCRYPTION` = tls
 - `MAIL_FROM_ADDRESS` = your-email@gmail.com
 - `MAIL_FROM_NAME` = Thunder Booking
+
+**Google OAuth (Optional):**
+- `GOOGLE_CLIENT_ID` = your-google-client-id
+- `GOOGLE_CLIENT_SECRET` = your-google-client-secret
+- `GOOGLE_REDIRECT_URI` = https://your-app-name.onrender.com/auth/google/callback
 
 ### 6. Push Your Code
 Commit and push all files:
@@ -112,6 +119,32 @@ Render's filesystem is ephemeral. For production:
 - Upgrade to paid plan for always-on service
 
 ## Troubleshooting
+
+### 500 Error - Most Common Issue
+**Check these in order:**
+
+1. **APP_KEY not set or invalid:**
+   - Go to Render Dashboard → Environment
+   - If APP_KEY is empty, set it to any value (e.g., "placeholder")
+   - Redeploy - the Dockerfile will auto-generate a proper key
+   - OR locally run `php artisan key:generate --show` and add the output
+
+2. **Database connection error:**
+   - Verify `DATABASE_URL` is set correctly
+   - Format should be: `postgresql://user:password@host:port/database`
+   - Ensure PostgreSQL database is created and running
+   - Check logs for "SQLSTATE" errors
+
+3. **View application logs:**
+   - In Render Dashboard, go to "Logs" tab
+   - Look for PHP errors or Laravel exceptions
+   - Check for missing environment variables
+
+4. **Clear all caches:**
+   - In Render Dashboard, go to "Shell" tab
+   - Run: `php artisan config:clear`
+   - Run: `php artisan cache:clear`
+   - Run: `php artisan view:clear`
 
 ### Build Fails
 - Check build logs in Render dashboard
