@@ -5,6 +5,8 @@ services:
     plan: free
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_NAME
+        value: Thunder Booking
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
