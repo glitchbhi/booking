@@ -29,6 +29,9 @@ WORKDIR /var/www/html
 # Copy existing application directory contents
 COPY . /var/www/html
 
+# Create .env file from example
+RUN cp .env.example .env
+
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/html
 
