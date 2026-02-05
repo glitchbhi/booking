@@ -1,0 +1,32 @@
+# Copy these environment variables to your Render dashboard
+
+APP_NAME="Thunder Booking"
+APP_ENV=production
+APP_KEY=  # Will be generated automatically
+APP_DEBUG=false
+APP_URL=https://your-app.onrender.com
+
+LOG_CHANNEL=stack
+LOG_LEVEL=error
+
+DB_CONNECTION=mysql
+# Database URL will be automatically set by Render
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=public
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-email@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# For file storage on Render, you may need to use cloud storage
+# Consider using AWS S3 or similar for production
