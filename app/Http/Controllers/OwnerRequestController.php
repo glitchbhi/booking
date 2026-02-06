@@ -49,10 +49,10 @@ class OwnerRequestController extends Controller
         ]);
 
         try {
-            // Handle image uploads
+            // Handle image uploads (max 4)
             $imagePaths = [];
             if ($request->hasFile('ground_images')) {
-                foreach ($request->file('ground_images') as $image) {
+                foreach (array_slice($request->file('ground_images'), 0, 4) as $image) {
                     $path = $image->store('ground-images', 'public');
                     $imagePaths[] = $path;
                 }
