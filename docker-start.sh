@@ -35,6 +35,16 @@ su -s /bin/bash www-data -c "php artisan cache:clear" || true
 su -s /bin/bash www-data -c "php artisan view:clear" || true
 su -s /bin/bash www-data -c "php artisan route:clear" || true
 
+# Debug: Check database environment variables
+echo "=== DATABASE CONFIGURATION DEBUG ==="
+echo "DB_CONNECTION: ${DB_CONNECTION:-not set}"
+if [ -n "$DATABASE_URL" ]; then
+  echo "DATABASE_URL: SET (${DATABASE_URL:0:20}...)"
+else
+  echo "DATABASE_URL: NOT SET"
+fi
+echo "===================================="
+
 # Debug: Check if Google OAuth vars are set
 echo "Checking Google OAuth environment variables..."
 if [ -z "$GOOGLE_CLIENT_ID" ]; then
@@ -42,6 +52,9 @@ if [ -z "$GOOGLE_CLIENT_ID" ]; then
 else
   echo "GOOGLE_CLIENT_ID is set"
 fi
+
+echo "Testing database connection..."
+su -s /bin/bash www-data -c "php artisan db:show" || echo "Database connection test failed"
 
 echo "Running migrations..."
 su -s /bin/bash www-data -c "php artisan migrate --force --no-interaction" || echo "Migration warning: Check database connection"
