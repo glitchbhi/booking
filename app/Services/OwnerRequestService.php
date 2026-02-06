@@ -57,14 +57,22 @@ class OwnerRequestService
         // Update user's owner status
         $user->update(['owner_status' => 'pending']);
 
-        // Notify all admins about the new request
+        // Notify all admins about the new request (silent fail for SMTP issues)
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            $admin->notify(new NewOwnerRequest($ownerRequest));
+            try {
+                $admin->notify(new NewOwnerRequest($ownerRequest));
+            } catch (\Exception $e) {
+                \Log::warning('Admin notification email failed: ' . $e->getMessage());
+            }
         }
         
-        // Notify the user that request was submitted
-        $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
+        // Notify the user that request was submitted (silent fail for SMTP issues)
+        try {
+            $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
+        } catch (\Exception $e) {
+            \Log::warning('Owner request submitted email failed: ' . $e->getMessage());
+        }
 
         return $ownerRequest;
     }
@@ -128,8 +136,12 @@ class OwnerRequestService
                 }
             }
             
-            // Send approval notification
-            $request->user->notify(new OwnerRequestApproved($notes ?? ''));
+            // Send approval notification (silent fail for SMTP issues)
+            try {
+                $request->user->notify(new OwnerRequestApproved($notes ?? ''));
+            } catch (\Exception $e) {
+                \Log::warning('Owner approval email failed: ' . $e->getMessage());
+            }
 
             return true;
         });
@@ -218,8 +230,12 @@ class OwnerRequestService
                 'owner_status' => 'rejected',
             ]);
             
-            // Send rejection notification
-            $request->user->notify(new OwnerRequestRejected($reason ?? ''));
+            // Send rejection notification (silent fail for SMTP issues)
+            try {
+                $request->user->notify(new OwnerRequestRejected($reason ?? ''));
+            } catch (\Exception $e) {
+                \Log::warning('Owner rejection email failed: ' . $e->getMessage());
+            }
 
             return true;
         });

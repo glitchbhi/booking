@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'log'), // Use 'log' on Render free tier (port 587 blocked)
 
     /*
     |--------------------------------------------------------------------------

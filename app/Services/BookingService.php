@@ -177,11 +177,19 @@ class BookingService
                     $booking->id
                 );
                 
-                // Send booking confirmation email to user
-                $user->notify(new BookingConfirmation($booking));
+                // Send booking confirmation email to user (silent fail for SMTP issues)
+                try {
+                    $user->notify(new BookingConfirmation($booking));
+                } catch (\Exception $e) {
+                    \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
+                }
                 
-                // Send notification to ground owner
-                $ground->owner->notify(new NewBookingForOwner($booking));
+                // Send notification to ground owner (silent fail for SMTP issues)
+                try {
+                    $ground->owner->notify(new NewBookingForOwner($booking));
+                } catch (\Exception $e) {
+                    \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
+                }
             }
 
             // Increment ground booking count
@@ -236,11 +244,19 @@ class BookingService
                 );
             }
             
-            // Send cancellation notification to user
-            $booking->user->notify(new BookingCancelled($booking));
+            // Send cancellation notification to user (silent fail for SMTP issues)
+            try {
+                $booking->user->notify(new BookingCancelled($booking));
+            } catch (\Exception $e) {
+                \Log::warning('Booking cancellation email to user failed: ' . $e->getMessage());
+            }
             
-            // Notify owner about cancellation
-            $booking->ground->owner->notify(new BookingCancelledForOwner($booking, $reason));
+            // Notify owner about cancellation (silent fail for SMTP issues)
+            try {
+                $booking->ground->owner->notify(new BookingCancelledForOwner($booking, $reason));
+            } catch (\Exception $e) {
+                \Log::warning('Booking cancellation email to owner failed: ' . $e->getMessage());
+            }
 
             return true;
         });

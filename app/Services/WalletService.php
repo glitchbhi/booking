@@ -31,7 +31,11 @@ class WalletService
 
             // Send notification
             if ($sendNotification) {
-                $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+                try {
+                    $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+                } catch (\Exception $e) {
+                    \Log::warning('Wallet credit email failed: ' . $e->getMessage());
+                }
             }
 
             return $transaction;
@@ -86,8 +90,12 @@ class WalletService
                 'description' => $description,
             ]);
 
-            // Send notification for refund
-            $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+            // Send notification for refund (silent fail for SMTP issues)
+            try {
+                $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+            } catch (\Exception $e) {
+                \Log::warning('Wallet refund email failed: ' . $e->getMessage());
+            }
 
             return $transaction;
         });
