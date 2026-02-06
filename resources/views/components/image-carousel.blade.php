@@ -53,7 +53,7 @@
                         alt="{{ $alt }} - Image {{ $index + 1 }}" 
                         class="w-full h-full object-cover"
                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                        onerror="this.onerror=null; this.src='{{ $placeholder }}'; console.error('Image load failed:', '{{ asset('storage/' . $image) }}');"
+                        onerror="console.error('Failed to load:', this.src); this.onerror=null; this.src='{{ $placeholder }}';"
                     >
                 </div>
             @endforeach
