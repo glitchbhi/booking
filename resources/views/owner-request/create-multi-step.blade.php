@@ -225,7 +225,7 @@
                                     </label>
                                     <p class="pl-1">or drag and drop</p>
                                 </div>
-                                <p class="text-xs text-gray-500">PNG, JPG, JPEG up to 10MB each (Max 5 images)</p>
+                                <p class="text-xs text-gray-500">PNG, JPG, JPEG up to 10MB each (Max 4 images)</p>
                             </div>
                         </div>
                         @error('ground_images')
@@ -634,7 +634,7 @@ function previewImages(event) {
     }
     
     if (files.length > 5) {
-        alert('You can only upload a maximum of 5 images');
+        alert('You can only upload a maximum of 4 images');
         event.target.value = '';
         return;
     }

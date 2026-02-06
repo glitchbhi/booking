@@ -45,7 +45,8 @@ class GroundManagementController extends Controller
             'day_rate_end' => 'nullable|date_format:H:i',
             'night_rate_start' => 'nullable|date_format:H:i',
             'night_rate_end' => 'nullable|date_format:H:i',
-            'images.*' => 'nullable|image|max:2048',
+            'images' => 'nullable|array|max:4',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -115,7 +116,8 @@ class GroundManagementController extends Controller
             'night_rate_start' => 'nullable|date_format:H:i',
             'night_rate_end' => 'nullable|date_format:H:i',
             'is_active' => 'boolean',
-            'images.*' => 'nullable|image|max:2048',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             'remove_images' => 'nullable|array',
         ]);
 
@@ -134,9 +136,14 @@ class GroundManagementController extends Controller
 
             // Handle new image uploads
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $path = $image->store('grounds', 'public');
-                    $currentImages[] = $path;
+                $remainingSlots = 4 - count($currentImages);
+                $newImages = array_slice($request->file('images'), 0, $remainingSlots);
+                
+                foreach ($newImages as $image) {
+                    if (count($currentImages) < 4) {
+                        $path = $image->store('grounds', 'public');
+                        $currentImages[] = $path;
+                    }
                 }
             }
 

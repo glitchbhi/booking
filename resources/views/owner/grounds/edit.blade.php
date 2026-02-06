@@ -198,25 +198,54 @@
                 <!-- Current Images -->
                 @if($ground->images && count($ground->images) > 0)
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Photos</label>
-                    <div class="grid grid-cols-5 gap-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Current Photos ({{ count($ground->images) }}/4)
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @foreach($ground->images as $index => $image)
-                            <div class="relative group">
-                                <img src="{{ asset('storage/' . $image) }}" class="h-24 w-full object-cover rounded-md">
-                                <label class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition">
-                                    <input type="checkbox" name="remove_images[]" value="{{ $index }}" class="sr-only">
-                                    <span class="text-white text-xs" onclick="this.previousElementSibling.checked = !this.previousElementSibling.checked; this.textContent = this.previousElementSibling.checked ? '✓ Remove' : 'Click to Remove'">Click to Remove</span>
-                                </label>
+                            <div class="relative group border-2 border-gray-200 rounded-lg overflow-hidden hover:border-red-400 transition" x-data="{ removing: false }">
+                                <img src="{{ asset('storage/' . $image) }}" class="w-full h-32 object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition">
+                                    <label class="absolute bottom-0 left-0 right-0 p-2 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            name="remove_images[]" 
+                                            value="{{ $index }}" 
+                                            class="hidden remove-checkbox"
+                                            @change="removing = $event.target.checked"
+                                        >
+                                        <div :class="removing ? 'bg-red-600' : 'bg-white/90'" class="flex items-center justify-center py-2 rounded transition">
+                                            <i :class="removing ? 'fas fa-trash-alt text-white' : 'fas fa-times-circle text-red-600'" class="mr-1.5"></i>
+                                            <span :class="removing ? 'text-white font-bold' : 'text-gray-900 font-medium'" class="text-xs" x-text="removing ? 'Will Remove' : 'Remove Photo'"></span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div x-show="removing" class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                    ✓
+                                </div>
                             </div>
                         @endforeach
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">Hover and click on images to mark for removal</p>
+                    <p class="mt-2 text-xs text-gray-600">
+                        <i class="fas fa-info-circle text-blue-500"></i> Click on photos to mark them for removal. Maximum 4 photos allowed.
+                    </p>
                 </div>
                 @endif
 
                 <!-- Upload New Images -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Add More Photos</label>
+                    @php
+                        $currentCount = $ground->images ? count($ground->images) : 0;
+                        $remainingSlots = 4 - $currentCount;
+                    @endphp
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Add More Photos 
+                        @if($remainingSlots > 0)
+                            <span class="text-green-600">({{ $remainingSlots }} slots remaining)</span>
+                        @else
+                            <span class="text-red-600">(Maximum reached - remove old photos to add new ones)</span>
+                        @endif
+                    </label>
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -229,10 +258,10 @@
                                 </label>
                                 <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB each</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF, WEBP up to 2MB each (max 4 total)</p>
                         </div>
                     </div>
-                    <div id="image-preview" class="mt-4 grid grid-cols-5 gap-4"></div>
+                    <div id="image-preview" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
                     @error('images.*')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -274,15 +303,26 @@
 <script>
 document.getElementById('images').addEventListener('change', function(e) {
     const preview = document.getElementById('image-preview');
+    const files = Array.from(e.target.files);
+    const currentImages = {{ $ground->images ? count($ground->images) : 0 }};
+    const remainingSlots = 4 - currentImages;
+    
+    if (files.length > remainingSlots) {
+        alert(`You can only add ${remainingSlots} more photo(s). Remove old photos first to add more.`);
+    }
+    
     preview.innerHTML = '';
     
-    [...e.target.files].slice(0, 5).forEach(file => {
+    files.slice(0, remainingSlots).forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(e) {
             const div = document.createElement('div');
-            div.className = 'relative';
+            div.className = 'relative border-2 border-green-500 rounded-lg overflow-hidden';
             div.innerHTML = `
-                <img src="${e.target.result}" class="h-24 w-full object-cover rounded-md">
+                <img src="${e.target.result}" class="h-32 w-full object-cover">
+                <div class="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center">
+                    New Photo ${index + 1}
+                </div>
             `;
             preview.appendChild(div);
         }

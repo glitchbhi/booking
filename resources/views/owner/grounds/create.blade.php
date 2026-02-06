@@ -216,10 +216,10 @@
                                 </label>
                                 <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB each (max 5 photos)</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB each (max 4 photos)</p>
                         </div>
                     </div>
-                    <div id="image-preview" class="mt-4 grid grid-cols-5 gap-4"></div>
+                    <div id="image-preview" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
                     @error('images.*')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -250,15 +250,24 @@
 <script>
 document.getElementById('images').addEventListener('change', function(e) {
     const preview = document.getElementById('image-preview');
+    const files = Array.from(e.target.files);
+    
+    if (files.length > 4) {
+        alert('Maximum 4 photos allowed. Only first 4 will be uploaded.');
+    }
+    
     preview.innerHTML = '';
     
-    [...e.target.files].slice(0, 5).forEach(file => {
+    files.slice(0, 4).forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(e) {
             const div = document.createElement('div');
-            div.className = 'relative';
+            div.className = 'relative border-2 border-green-500 rounded-lg overflow-hidden';
             div.innerHTML = `
-                <img src="${e.target.result}" class="h-24 w-full object-cover rounded-md">
+                <img src="${e.target.result}" class="h-32 w-full object-cover">
+                <div class="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center">
+                    Photo ${index + 1}
+                </div>
             `;
             preview.appendChild(div);
         }

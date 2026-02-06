@@ -29,16 +29,21 @@ class WalletService
                 'description' => $description,
             ]);
 
-            // Send notification
-            if ($sendNotification) {
+            return $transaction;
+        });
+
+        // Send notification after transaction (non-blocking)
+        if ($sendNotification) {
+            dispatch(function () use ($user, $amount, $description, $transaction) {
                 try {
-                    $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+                    $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
                 } catch (\Exception $e) {
                     \Log::warning('Wallet credit email failed: ' . $e->getMessage());
                 }
-            }
+            })->afterResponse();
+        }
 
-            return $transaction;
+        return $transaction;
         });
     }
 
@@ -90,15 +95,19 @@ class WalletService
                 'description' => $description,
             ]);
 
-            // Send notification for refund (silent fail for SMTP issues)
+            return $transaction;
+        });
+
+        // Send notification after transaction (non-blocking)
+        dispatch(function () use ($user, $amount, $description, $transaction) {
             try {
-                $user->notify(new WalletCredited($amount, $description, $balanceAfter));
+                $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
             } catch (\Exception $e) {
                 \Log::warning('Wallet refund email failed: ' . $e->getMessage());
             }
+        })->afterResponse();
 
-            return $transaction;
-        });
+        return $transaction;
     }
 
     /**

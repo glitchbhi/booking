@@ -27,6 +27,8 @@ services:
         value: file
       - key: QUEUE_CONNECTION
         value: sync
+      - key: MAIL_MAILER
+        value: log
       - key: LOG_CHANNEL
         value: errorlog
       - key: GOOGLE_CLIENT_ID

@@ -57,24 +57,37 @@ class OwnerRequestService
         // Update user's owner status
         $user->update(['owner_status' => 'pending']);
 
-        // Notify all admins about the new request (silent fail for SMTP issues)
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            try {
-                $admin->notify(new NewOwnerRequest($ownerRequest));
-            } catch (\Exception $e) {
-                \Log::warning('Admin notification email failed: ' . $e->getMessage());
-            }
-        }
-        
-        // Notify the user that request was submitted (silent fail for SMTP issues)
-        try {
-            $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
-        } catch (\Exception $e) {
-            \Log::warning('Owner request submitted email failed: ' . $e->getMessage());
-        }
+        // Send notifications asynchronously
+        $this->sendOwnerRequestNotifications($ownerRequest, $user);
 
         return $ownerRequest;
+    }
+
+    /**
+     * Send owner request notifications (called after transaction)
+     */
+    private function sendOwnerRequestNotifications($ownerRequest, $user)
+    {
+        // Notify all admins about the new request (non-blocking)
+        dispatch(function () use ($ownerRequest) {
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                try {
+                    $admin->notify(new NewOwnerRequest($ownerRequest));
+                } catch (\Exception $e) {
+                    \Log::warning('Admin notification email failed: ' . $e->getMessage());
+                }
+            }
+        })->afterResponse();
+        
+        // Notify the user that request was submitted (non-blocking)
+        dispatch(function () use ($ownerRequest, $user) {
+            try {
+                $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
+            } catch (\Exception $e) {
+                \Log::warning('Owner request submitted email failed: ' . $e->getMessage());
+            }
+        })->afterResponse();
     }
 
     /**
@@ -136,15 +149,19 @@ class OwnerRequestService
                 }
             }
             
-            // Send approval notification (silent fail for SMTP issues)
+            return true;
+        });
+
+        // Send approval notification after transaction (non-blocking)
+        dispatch(function () use ($request, $notes) {
             try {
                 $request->user->notify(new OwnerRequestApproved($notes ?? ''));
             } catch (\Exception $e) {
                 \Log::warning('Owner approval email failed: ' . $e->getMessage());
             }
+        })->afterResponse();
 
-            return true;
-        });
+        return true;
     }
 
     /**
@@ -230,15 +247,19 @@ class OwnerRequestService
                 'owner_status' => 'rejected',
             ]);
             
-            // Send rejection notification (silent fail for SMTP issues)
+            return true;
+        });
+
+        // Send rejection notification after transaction (non-blocking)
+        dispatch(function () use ($request, $reason) {
             try {
                 $request->user->notify(new OwnerRequestRejected($reason ?? ''));
             } catch (\Exception $e) {
                 \Log::warning('Owner rejection email failed: ' . $e->getMessage());
             }
+        })->afterResponse();
 
-            return true;
-        });
+        return true;
     }
 
     /**

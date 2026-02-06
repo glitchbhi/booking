@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'), // Use 'log' on Render free tier (port 587 blocked)
+    'default' => env('MAIL_MAILER', 'log'), // 'log' = fast, no timeout | 'smtp' = slow on Render free tier
 
     /*
     |--------------------------------------------------------------------------

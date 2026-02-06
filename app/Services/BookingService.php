@@ -176,20 +176,6 @@ class BookingService
                     "Booking payment for {$ground->name}",
                     $booking->id
                 );
-                
-                // Send booking confirmation email to user (silent fail for SMTP issues)
-                try {
-                    $user->notify(new BookingConfirmation($booking));
-                } catch (\Exception $e) {
-                    \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
-                }
-                
-                // Send notification to ground owner (silent fail for SMTP issues)
-                try {
-                    $ground->owner->notify(new NewBookingForOwner($booking));
-                } catch (\Exception $e) {
-                    \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
-                }
             }
 
             // Increment ground booking count
@@ -202,6 +188,27 @@ class BookingService
 
             return $booking;
         });
+
+        // Send notifications after transaction completes (non-blocking, after response)
+        if ($bookingType === 'online') {
+            dispatch(function () use ($user, $ground, $booking) {
+                try {
+                    $user->notify(new BookingConfirmation($booking));
+                } catch (\Exception $e) {
+                    \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
+                }
+            })->afterResponse();
+
+            dispatch(function () use ($ground, $booking) {
+                try {
+                    $ground->owner->notify(new NewBookingForOwner($booking));
+                } catch (\Exception $e) {
+                    \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
+                }
+            })->afterResponse();
+        }
+
+        return $booking;
     }
 
     /**
@@ -244,22 +251,27 @@ class BookingService
                 );
             }
             
-            // Send cancellation notification to user (silent fail for SMTP issues)
+            return true;
+        });
+
+        // Send cancellation notifications after transaction (non-blocking)
+        dispatch(function () use ($booking) {
             try {
                 $booking->user->notify(new BookingCancelled($booking));
             } catch (\Exception $e) {
                 \Log::warning('Booking cancellation email to user failed: ' . $e->getMessage());
             }
-            
-            // Notify owner about cancellation (silent fail for SMTP issues)
+        })->afterResponse();
+
+        dispatch(function () use ($booking, $reason) {
             try {
                 $booking->ground->owner->notify(new BookingCancelledForOwner($booking, $reason));
             } catch (\Exception $e) {
                 \Log::warning('Booking cancellation email to owner failed: ' . $e->getMessage());
             }
+        })->afterResponse();
 
-            return true;
-        });
+        return true;
     }
 
     /**
