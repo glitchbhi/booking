@@ -26,18 +26,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
+# Copy composer files first
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies without running artisan scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
 # Copy existing application directory contents
 COPY . /var/www/html
-
-# Create .env file and set APP_KEY before composer install
-RUN cp .env.example .env && \
-    sed -i "s|^APP_KEY=.*|APP_KEY=base64:$(openssl rand -base64 32)|g" .env
-
-# Copy existing application directory permissions
-RUN chown -R www-data:www-data /var/www/html
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Install Node dependencies and build assets
 RUN npm ci && npm run build
@@ -52,8 +48,9 @@ RUN mkdir -p /var/www/html/storage/logs \
     /var/www/html/storage/framework/cache \
     /var/www/html/bootstrap/cache
 
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Set ownership and permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite

@@ -29,6 +29,9 @@ if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "placeholder" ]; then
   su -s /bin/bash www-data -c "php artisan key:generate --force --no-interaction" || echo "Key generation skipped"
 fi
 
+echo "Running package discovery..."
+su -s /bin/bash www-data -c "php artisan package:discover --ansi" || true
+
 echo "Clearing caches..."
 su -s /bin/bash www-data -c "php artisan config:clear" || true
 su -s /bin/bash www-data -c "php artisan cache:clear" || true
