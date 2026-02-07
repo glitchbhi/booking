@@ -92,19 +92,17 @@ class WalletService
                 'description' => $description,
             ]);
 
+            // Send notification after transaction (non-blocking)
+            dispatch(function () use ($user, $amount, $description, $transaction) {
+                try {
+                    $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
+                } catch (\Exception $e) {
+                    \Log::warning('Wallet refund email failed: ' . $e->getMessage());
+                }
+            })->afterResponse();
+
             return $transaction;
         });
-
-        // Send notification after transaction (non-blocking)
-        dispatch(function () use ($user, $amount, $description, $transaction) {
-            try {
-                $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
-            } catch (\Exception $e) {
-                \Log::warning('Wallet refund email failed: ' . $e->getMessage());
-            }
-        })->afterResponse();
-
-        return $transaction;
     }
 
     /**
