@@ -29,9 +29,9 @@ WORKDIR /var/www/html
 # Copy existing application directory contents
 COPY . /var/www/html
 
-# Create .env file with temporary key before composer install
+# Create .env file and set APP_KEY before composer install
 RUN cp .env.example .env && \
-    echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+    sed -i "s|^APP_KEY=.*|APP_KEY=base64:$(openssl rand -base64 32)|g" .env
 
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/html
