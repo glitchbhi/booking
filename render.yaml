@@ -4,6 +4,10 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
+    disk:
+      name: thunder-storage
+      mountPath: /var/www/html/storage/app/public
+      sizeGB: 1
     envVars:
       - key: APP_NAME
         value: Thunder Booking
@@ -44,7 +48,7 @@ services:
       - key: MAIL_USERNAME
         value: thunderbooking975@gmail.com
       - key: MAIL_PASSWORD
-        value: xfld blpc hmft cbau
+        value: xfldbblpchmftcbau
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
