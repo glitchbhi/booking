@@ -42,13 +42,13 @@ services:
       - key: MAIL_MAILER
         value: smtp
       - key: MAIL_HOST
-        value: smtp.gmail.com
+        value: smtp-relay.brevo.com
       - key: MAIL_PORT
         value: 587
       - key: MAIL_USERNAME
         value: thunderbooking975@gmail.com
       - key: MAIL_PASSWORD
-        value: "xfld blpc hmft cbau"
+        sync: false
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
