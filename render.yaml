@@ -48,7 +48,7 @@ services:
       - key: MAIL_USERNAME
         value: thunderbooking975@gmail.com
       - key: MAIL_PASSWORD
-        value: xfldbblpchmftcbau
+        value: "xfld blpc hmft cbau"
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
