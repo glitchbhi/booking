@@ -54,10 +54,11 @@ class GroundManagementController extends Controller
             $validated['owner_id'] = Auth::id();
             $validated['is_active'] = false; // Manually added grounds require admin approval
             
-            // Handle image uploads
+            // Handle image uploads (max 4)
             if ($request->hasFile('images')) {
                 $images = [];
-                foreach ($request->file('images') as $image) {
+                $uploadedImages = array_slice($request->file('images'), 0, 4);
+                foreach ($uploadedImages as $image) {
                     $path = $image->store('grounds', 'public');
                     $images[] = $path;
                 }

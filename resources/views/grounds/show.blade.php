@@ -18,7 +18,7 @@
     
     $sportName = $ground->sportType->name ?? 'default';
     $placeholderImage = $placeholderImages[$sportName] ?? $placeholderImages['default'];
-    $groundImages = $ground->images && is_array($ground->images) ? $ground->images : [];
+    $groundImages = $ground->images && is_array($ground->images) ? array_slice($ground->images, 0, 4) : [];
     $hasMultipleImages = count($groundImages) > 1;
 @endphp
 

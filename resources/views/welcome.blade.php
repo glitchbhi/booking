@@ -235,7 +235,7 @@
                     @php
                         $sportName = $ground->sportType->name ?? 'default';
                         $placeholderImage = $placeholderImages[$sportName] ?? $placeholderImages['default'];
-                        $groundImages = $ground->images && is_array($ground->images) ? $ground->images : [];
+                        $groundImages = $ground->images && is_array($ground->images) ? array_slice($ground->images, 0, 4) : [];
                     @endphp
                     <a href="{{ route('grounds.show', $ground) }}" class="block bg-white rounded-xl shadow-md overflow-hidden venue-card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
                         <!-- Image Carousel -->
