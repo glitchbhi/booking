@@ -16,6 +16,7 @@ mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/bootstrap/cache
+mkdir -p /var/www/html/storage/app/public/grounds
 
 # Set ownership to www-data BEFORE setting permissions
 chown -R www-data:www-data /var/www/html/storage
@@ -72,14 +73,24 @@ su -s /bin/bash www-data -c "php artisan fix:approved-owners --no-interaction" |
 echo "Configuration will use environment variables directly..."
 
 echo "Creating storage link..."
+# Remove old symlink if it exists
+rm -f /var/www/html/public/storage 2>/dev/null || true
+# Create new symlink
 su -s /bin/bash www-data -c "php artisan storage:link --force" || true
 
 # Verify storage link
 if [ -L "/var/www/html/public/storage" ]; then
   echo "✓ Storage link created successfully"
   ls -la /var/www/html/public/storage
+  echo "Checking if grounds directory is accessible:"
+  ls -la /var/www/html/storage/app/public/grounds 2>/dev/null || echo "No images in grounds directory yet"
 else
   echo "✗ WARNING: Storage link not created!"
+  echo "Attempting manual symlink..."
+  ln -sf /var/www/html/storage/app/public /var/www/html/public/storage
+  if [ -L "/var/www/html/public/storage" ]; then
+    echo "✓ Manual symlink created successfully"
+  fi
 fi
 
 # Ensure storage permissions
