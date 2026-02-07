@@ -29,21 +29,18 @@ class WalletService
                 'description' => $description,
             ]);
 
+            // Send notification after transaction (non-blocking)
+            if ($sendNotification) {
+                dispatch(function () use ($user, $amount, $description, $transaction) {
+                    try {
+                        $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
+                    } catch (\Exception $e) {
+                        \Log::warning('Wallet credit email failed: ' . $e->getMessage());
+                    }
+                })->afterResponse();
+            }
+
             return $transaction;
-        });
-
-        // Send notification after transaction (non-blocking)
-        if ($sendNotification) {
-            dispatch(function () use ($user, $amount, $description, $transaction) {
-                try {
-                    $user->notify(new WalletCredited($amount, $description, $transaction->balance_after));
-                } catch (\Exception $e) {
-                    \Log::warning('Wallet credit email failed: ' . $e->getMessage());
-                }
-            })->afterResponse();
-        }
-
-        return $transaction;
         });
     }
 
