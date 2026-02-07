@@ -32,8 +32,9 @@ COPY . /var/www/html
 # Create .env file from example
 RUN cp .env.example .env
 
-# Set a temporary APP_KEY for build process (will be overridden by environment variable)
-RUN sed -i 's/APP_KEY=/APP_KEY=base64:'"$(openssl rand -base64 32)"'/g' .env
+# Generate and set APP_KEY for build process
+RUN APP_KEY_VALUE=$(openssl rand -base64 32) && \
+    sed -i "s|APP_KEY=|APP_KEY=base64:${APP_KEY_VALUE}|g" .env
 
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/html
