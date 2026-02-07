@@ -16,6 +16,9 @@ mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/bootstrap/cache
+
+# DON'T create storage/app/public - it's mounted from persistent disk
+# Just ensure grounds subdirectory exists in the mounted volume
 mkdir -p /var/www/html/storage/app/public/grounds
 
 # Set ownership to www-data BEFORE setting permissions
@@ -23,6 +26,15 @@ chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
+
+# Verify persistent disk is mounted
+echo "Checking persistent disk..."
+if mountpoint -q /var/www/html/storage/app/public; then
+  echo "✓ Persistent disk mounted at /var/www/html/storage/app/public"
+  df -h /var/www/html/storage/app/public
+else
+  echo "✗ WARNING: Persistent disk NOT mounted!"
+fi
 
 # Generate APP_KEY if not set (run as www-data)
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "placeholder" ]; then
