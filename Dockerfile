@@ -29,18 +29,17 @@ WORKDIR /var/www/html
 # Copy existing application directory contents
 COPY . /var/www/html
 
-# Create .env file from example
-RUN cp .env.example .env
-
-# Generate and set APP_KEY for build process
-RUN APP_KEY_VALUE=$(openssl rand -base64 32) && \
-    sed -i "s|APP_KEY=|APP_KEY=base64:${APP_KEY_VALUE}|g" .env
-
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install PHP dependencies without running scripts
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Create .env file and generate key
+RUN cp .env.example .env && php artisan key:generate --no-interaction
+
+# Run package discovery
+RUN php artisan package:discover --ansi
 
 # Install Node dependencies and build assets
 RUN npm ci && npm run build
