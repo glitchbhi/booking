@@ -48,7 +48,7 @@ services:
       - key: MAIL_USERNAME
         value: thunderbooking975@gmail.com
       - key: MAIL_PASSWORD
-        sync: false
+        value: xsmtpsib-a9805647e62a341e799e8a76c98f5be19E1c91634195d2125489416b1a6e49d1c3b19ad7d1d8de1d1a14449d75d88f5a
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
