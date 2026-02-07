@@ -4,22 +4,11 @@
 
 @section('content')
 @php
-    // Placeholder images for different sport types
-    $placeholderImages = [
-        'Football' => 'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&h=400&fit=crop',
-        'Cricket' => 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&h=400&fit=crop',
-        'Badminton' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&h=400&fit=crop',
-        'Tennis' => 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=400&fit=crop',
-        'Basketball' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&h=400&fit=crop',
-        'Archery' => 'https://images.unsplash.com/photo-1510925758641-869d353cecc7?w=800&h=400&fit=crop',
-        'Swimming' => 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&h=400&fit=crop',
-        'default' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=400&fit=crop'
-    ];
-    
-    $sportName = $ground->sportType->name ?? 'default';
-    $placeholderImage = $placeholderImages[$sportName] ?? $placeholderImages['default'];
-    $groundImages = $ground->images && is_array($ground->images) ? array_slice($ground->images, 0, 4) : [];
+    $groundImages = $ground->images && is_array($ground->images) && count($ground->images) > 0 
+        ? array_slice($ground->images, 0, 4) 
+        : [];
     $hasMultipleImages = count($groundImages) > 1;
+    $hasImages = count($groundImages) > 0;
 @endphp
 
 <div class="max-w-full 2xl:max-w-[1920px] 3xl:max-w-[2560px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6">
@@ -131,8 +120,9 @@
                         <img src="{{ asset('storage/' . $groundImages[0]) }}" alt="{{ $ground->name }}" class="w-full h-full object-cover">
                     </div>
                 @else
-                    <div class="h-80 md:h-96">
-                        <img src="{{ $placeholderImage }}" alt="{{ $ground->name }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center\'><i class=\'fas fa-image text-white text-6xl opacity-50\'></i></div>';">
+                    <div class="h-80 md:h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                        <i class="fas fa-image text-gray-400 text-6xl mb-4"></i>
+                        <span class="text-gray-500 text-xl font-medium">No images available</span>
                     </div>
                 @endif
             </div>

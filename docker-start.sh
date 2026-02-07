@@ -72,7 +72,19 @@ su -s /bin/bash www-data -c "php artisan fix:approved-owners --no-interaction" |
 echo "Configuration will use environment variables directly..."
 
 echo "Creating storage link..."
-su -s /bin/bash www-data -c "php artisan storage:link" || true
+su -s /bin/bash www-data -c "php artisan storage:link --force" || true
+
+# Verify storage link
+if [ -L "/var/www/html/public/storage" ]; then
+  echo "✓ Storage link created successfully"
+  ls -la /var/www/html/public/storage
+else
+  echo "✗ WARNING: Storage link not created!"
+fi
+
+# Ensure storage permissions
+chmod -R 775 /var/www/html/storage/app/public 2>/dev/null || true
+chown -R www-data:www-data /var/www/html/storage/app/public 2>/dev/null || true
 
 echo "Starting Apache..."
 exec apache2-foreground

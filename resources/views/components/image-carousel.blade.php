@@ -1,4 +1,4 @@
-@props(['images' => [], 'placeholder' => '', 'alt' => 'Image', 'height' => 'h-48', 'showDots' => true, 'showArrows' => true])
+@props(['images' => [], 'alt' => 'Image', 'height' => 'h-48', 'showDots' => true, 'showArrows' => true])
 
 @php
     $uniqueId = 'carousel-' . uniqid();
@@ -53,20 +53,11 @@
                         alt="{{ $alt }} - Image {{ $index + 1 }}" 
                         class="w-full h-full object-cover"
                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                        onerror="console.error('Failed to load:', this.src); this.onerror=null; this.src='{{ $placeholder }}';"
+                        onerror="console.error('Image load failed:', this.src); this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gray-100 flex items-center justify-center\'><i class=\'fas fa-exclamation-triangle text-gray-400 text-3xl\'></i></div>';"
                     >
                 </div>
             @endforeach
-        @else
-            <!-- Placeholder Image -->
-            <div class="absolute inset-0">
-                <img 
-                    src="{{ $placeholder }}" 
-                    alt="{{ $alt }}" 
-                    class="w-full h-full object-cover"
-                    onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center\'><i class=\'fas fa-image text-white text-5xl opacity-50\'></i></div>';"
-                >
-            </div>
+
         @endif
     </div>
 

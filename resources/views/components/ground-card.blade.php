@@ -1,34 +1,28 @@
 @props(['ground'])
 
 @php
-    // Array of placeholder images for different sport types
-    $placeholderImages = [
-        'Football' => 'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=400&h=300&fit=crop',
-        'Cricket' => 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=300&fit=crop',
-        'Badminton' => 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=300&fit=crop',
-        'Tennis' => 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400&h=300&fit=crop',
-        'Basketball' => 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=300&fit=crop',
-        'Archery' => 'https://images.unsplash.com/photo-1510925758641-869d353cecc7?w=400&h=300&fit=crop',
-        'Swimming' => 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400&h=300&fit=crop',
-        'default' => 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop'
-    ];
-    
-    $sportName = $ground->sportType->name ?? 'default';
-    $placeholderImage = $placeholderImages[$sportName] ?? $placeholderImages['default'];
-    
-    // Check if ground has uploaded images (limit to max 4)
-    $groundImages = $ground->images && is_array($ground->images) ? array_slice($ground->images, 0, 4) : [];
+    // Get actual uploaded images from database only (limit to max 4)
+    $groundImages = $ground->images && is_array($ground->images) && count($ground->images) > 0 
+        ? array_slice($ground->images, 0, 4) 
+        : [];
+    $hasImages = count($groundImages) > 0;
 @endphp
 
 <a href="{{ route('grounds.show', $ground) }}" class="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
     <!-- Image Carousel -->
     <div class="relative">
-        <x-image-carousel 
-            :images="$groundImages" 
-            :placeholder="$placeholderImage" 
-            :alt="$ground->name"
-            height="h-48"
-        />
+        @if($hasImages)
+            <x-image-carousel 
+                :images="$groundImages" 
+                :alt="$ground->name"
+                height="h-48"
+            />
+        @else
+            <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                <i class="fas fa-image text-gray-400 text-4xl mb-2"></i>
+                <span class="text-gray-500 text-sm font-medium">No images uploaded</span>
+            </div>
+        @endif
         
         <!-- Rating Badge -->
         <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-sm font-semibold flex items-center shadow-lg z-10">
