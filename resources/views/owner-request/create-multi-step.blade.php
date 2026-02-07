@@ -633,7 +633,7 @@ function previewImages(event) {
         return;
     }
     
-    if (files.length > 5) {
+    if (files.length > 4) {
         alert('You can only upload a maximum of 4 images');
         event.target.value = '';
         return;
