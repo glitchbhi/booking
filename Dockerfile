@@ -32,6 +32,9 @@ COPY . /var/www/html
 # Create .env file from example
 RUN cp .env.example .env
 
+# Generate application key before composer install
+RUN php artisan key:generate --no-interaction
+
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/html
 
