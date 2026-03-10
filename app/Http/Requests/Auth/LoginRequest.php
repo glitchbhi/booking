@@ -45,14 +45,6 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
-            // Check if user exists and was created with Google (has google_id but wrong password)
-            $user = User::where('email', $this->email)->first();
-            if ($user && $user->google_id) {
-                throw ValidationException::withMessages([
-                    'email' => 'This account was created with Google. You can either: 1) Click "Continue with Google" below, or 2) Use "Forgot Password" to set a password for email login.',
-                ]);
-            }
-
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);

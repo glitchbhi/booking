@@ -1,6 +1,6 @@
-@props(['ground'])
-
 @php
+    $ground = $ground ?? null;
+    
     // Get actual uploaded images from database only (limit to max 4)
     $groundImages = $ground->images && is_array($ground->images) && count($ground->images) > 0 
         ? array_slice($ground->images, 0, 4) 

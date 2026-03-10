@@ -1,6 +1,10 @@
-@props(['images' => [], 'alt' => 'Image', 'height' => 'h-48', 'showDots' => true, 'showArrows' => true])
-
 @php
+    $images = $images ?? [];
+    $alt = $alt ?? 'Image';
+    $height = $height ?? 'h-48';
+    $showDots = $showDots ?? true;
+    $showArrows = $showArrows ?? true;
+    
     $uniqueId = 'carousel-' . uniqid();
     $hasMultipleImages = is_array($images) && count($images) > 1;
     $hasImages = is_array($images) && count($images) > 0;

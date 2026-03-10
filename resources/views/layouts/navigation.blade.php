@@ -47,10 +47,8 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-2 sm:px-3 py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div class="hidden sm:block">{{ Auth::user()->name }}</div>
-                            <div class="sm:hidden">
-                                <i class="fas fa-user-circle text-lg"></i>
-                            </div>
+                            <i class="fas fa-user-circle text-lg mr-2"></i>
+                            <div class="truncate max-w-[120px] sm:max-w-none">{{ Auth::user()->name ?? 'User' }}</div>
 
                             <div class="ml-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
