@@ -32,10 +32,13 @@ class BookingController extends Controller
             'duration_hours' => 'required|numeric|min:1|max:168',
             'duration_unit' => 'required|in:hours,days',
             'notes' => 'nullable|string|max:500',
+            'payment_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'duration_hours.min' => 'Minimum booking duration is 1 hour.',
             'duration_hours.required' => 'Please select a booking duration.',
             'start_time.after_or_equal' => 'Booking time must be in the future.',
+            'payment_proof.image' => 'Payment proof must be an image.',
+            'payment_proof.max' => 'Payment proof image must not exceed 2MB.',
         ]);
 
         try {
@@ -49,13 +52,20 @@ class BookingController extends Controller
                 $endDateTime = $startDateTime->copy()->addDays($duration);
             }
 
+            // Handle payment proof upload
+            $paymentProofPath = null;
+            if ($request->hasFile('payment_proof')) {
+                $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+            }
+
             // Create booking
             $booking = $this->bookingService->createBooking(
                 $ground,
                 Auth::user(),
                 $startDateTime,
                 $endDateTime,
-                'online'
+                'online',
+                $paymentProofPath
             );
 
             return redirect()

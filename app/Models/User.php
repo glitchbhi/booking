@@ -29,6 +29,7 @@ class User extends Authenticatable
         'late_cancel_count',
         'google_id',
         'avatar',
+        'password_set_at',
     ];
 
     /**
@@ -53,6 +54,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'suspended_until' => 'datetime',
             'is_suspended' => 'boolean',
+            'password_set_at' => 'datetime',
         ];
     }
 
@@ -101,5 +103,27 @@ class User extends Authenticatable
     public function canBook()
     {
         return !$this->is_suspended || ($this->suspended_until && now()->greaterThan($this->suspended_until));
+    }
+
+    /**
+     * Check if user signed up with Google OAuth
+     */
+    public function isGoogleUser()
+    {
+        return !empty($this->google_id);
+    }
+
+    /**
+     * Check if Google user has set their own password
+     */
+    public function hasSetPassword()
+    {
+        // If not a Google user, they always have their password
+        if (!$this->isGoogleUser()) {
+            return true;
+        }
+        
+        // Check if password_set_at is set (will add this field)
+        return !empty($this->password_set_at);
     }
 }

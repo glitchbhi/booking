@@ -72,6 +72,29 @@
             </div>
         </div>
 
+        @if($booking->payment_proof)
+            <div class="mt-6 border-t pt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Proof</h2>
+                <div class="bg-gray-50 rounded-md p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-600 text-sm">
+                            <i class="fas fa-check-circle text-green-600"></i> Payment screenshot uploaded
+                        </span>
+                        <a href="{{ asset('storage/' . $booking->payment_proof) }}" 
+                           download 
+                           class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                    <img src="{{ asset('storage/' . $booking->payment_proof) }}" 
+                         alt="Payment Proof" 
+                         class="max-w-full h-auto rounded border cursor-pointer hover:opacity-75"
+                         onclick="window.open(this.src, '_blank')">
+                    <p class="text-xs text-gray-500 mt-2 text-center">Click image to view full size</p>
+                </div>
+            </div>
+        @endif
+
         @if($booking->review)
             <div class="mt-6 border-t pt-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Review</h2>

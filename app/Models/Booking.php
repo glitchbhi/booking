@@ -22,6 +22,7 @@ class Booking extends Model
         'total_amount',
         'status',
         'booking_type',
+        'payment_proof',
         'cancellation_reason',
         'cancelled_at',
         'is_no_show',

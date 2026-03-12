@@ -39,6 +39,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Proof</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                     </tr>
@@ -52,6 +53,16 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->start_time->format('M d, Y h:i A') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->duration_hours }} hrs</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">BTN {{ number_format($booking->total_amount, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($booking->payment_proof)
+                                    <button onclick="showPaymentProof('{{ asset('storage/' . $booking->payment_proof) }}', '{{ $booking->booking_number }}')" 
+                                            class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-image"></i> View
+                                    </button>
+                                @else
+                                    <span class="text-gray-400">No proof</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs rounded-full
                                     {{ $booking->status === 'booked' ? 'bg-blue-100 text-blue-800' : '' }}
@@ -81,4 +92,51 @@
         </div>
     @endif
 </div>
+
+<!-- Payment Proof Modal -->
+<div id="paymentProofModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50" onclick="closePaymentProof(event)">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Payment Proof - <span id="modalBookingNumber"></span></h3>
+            <button onclick="closePaymentProof()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div class="mt-2">
+            <img id="modalPaymentImage" src="" alt="Payment Proof" class="w-full h-auto rounded">
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+            <a id="downloadButton" href="" download class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <i class="fas fa-download"></i> Download
+            </a>
+            <button onclick="closePaymentProof()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPaymentProof(imageUrl, bookingNumber) {
+    document.getElementById('paymentProofModal').classList.remove('hidden');
+    document.getElementById('modalPaymentImage').src = imageUrl;
+    document.getElementById('modalBookingNumber').textContent = bookingNumber;
+    document.getElementById('downloadButton').href = imageUrl;
+    document.body.style.overflow = 'hidden';
+}
+
+function closePaymentProof(event) {
+    if (!event || event.target.id === 'paymentProofModal' || event.type === 'click') {
+        document.getElementById('paymentProofModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closePaymentProof();
+    }
+});
+</script>
 @endsection

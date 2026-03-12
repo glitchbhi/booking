@@ -71,7 +71,11 @@ class GoogleController extends Controller
             // Login the user
             Auth::login($user, true);
 
-            return redirect()->route('welcome')->with('success', 'Welcome, ' . $user->name . '!');
+            if ($isNewUser) {
+                return redirect()->route('welcome')->with('success', 'Welcome, ' . $user->name . '! You can set a password in your profile to enable login without Google.');
+            }
+
+            return redirect()->route('welcome')->with('success', 'Welcome back, ' . $user->name . '!');
 
         } catch (\Exception $e) {
             // Log the error for debugging

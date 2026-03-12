@@ -48,9 +48,10 @@ class BookingService
         User $user,
         Carbon $startTime,
         Carbon $endTime,
-        string $bookingType = 'online'
+        string $bookingType = 'online',
+        ?string $paymentProofPath = null
     ): Booking {
-        return DB::transaction(function () use ($ground, $user, $startTime, $endTime, $bookingType) {
+        return DB::transaction(function () use ($ground, $user, $startTime, $endTime, $bookingType, $paymentProofPath) {
             // Validate user can book
             if ($bookingType === 'online' && !$user->canBook()) {
                 throw new \Exception('Your account is suspended from booking');
@@ -106,6 +107,7 @@ class BookingService
                 'total_amount' => $totalAmount,
                 'status' => 'booked',
                 'booking_type' => $bookingType,
+                'payment_proof' => $paymentProofPath,
             ]);
 
             // Increment ground booking count
