@@ -11,7 +11,7 @@
     <!-- Quick Actions -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <a href="{{ route('owner.grounds.index') }}" class="flex flex-col items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
                 <i class="fas fa-store text-indigo-600 text-3xl mb-2"></i>
                 <span class="text-sm font-medium text-gray-700">My Grounds</span>
@@ -27,10 +27,6 @@
             <a href="{{ route('owner.bookings.create') }}" class="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
                 <i class="fas fa-calendar-plus text-purple-600 text-3xl mb-2"></i>
                 <span class="text-sm font-medium text-gray-700">Offline Booking</span>
-            </a>
-            <a href="{{ route('wallet.index') }}" class="flex flex-col items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition">
-                <i class="fas fa-wallet text-yellow-600 text-3xl mb-2"></i>
-                <span class="text-sm font-medium text-gray-700">Wallet</span>
             </a>
         </div>
     </div>

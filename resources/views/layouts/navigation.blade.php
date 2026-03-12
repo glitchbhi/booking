@@ -18,9 +18,6 @@
                     <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.*')">
                         {{ __('Bookings') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('wallet.index')" :active="request()->routeIs('wallet.*')">
-                        {{ __('Wallet') }}
-                    </x-nav-link>
                     
                     @if(Auth::user()->role === 'user' && Auth::user()->owner_status !== 'pending')
                         <x-nav-link :href="route('owner-request.create')" :active="request()->routeIs('owner-request.*')">
@@ -66,9 +63,6 @@
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('bookings.index')">
                                 <i class="fas fa-calendar-check w-5"></i> {{ __('My Bookings') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('wallet.index')">
-                                <i class="fas fa-wallet w-5"></i> {{ __('Wallet') }}
                             </x-dropdown-link>
                             
                             @if(Auth::user()->role === 'user' && Auth::user()->owner_status !== 'pending')

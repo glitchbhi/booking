@@ -135,24 +135,11 @@
                                 Cancellations within 4 hours will not be refunded and will count as a strike.
                             </p>
                         </div>
-
-                        <div class="bg-gray-50 rounded-md p-3 sm:p-4">
-                            <p class="text-xs sm:text-sm text-gray-600">
-                                <i class="fas fa-wallet"></i> <strong>Your Wallet Balance:</strong> BTN {{ number_format(auth()->user()->wallet_balance, 0) }}
-                            </p>
-                            @if(auth()->user()->wallet_balance < $ground->rate_per_hour)
-                                <p class="text-xs sm:text-sm text-red-600 mt-2">
-                                    <i class="fas fa-exclamation-triangle"></i> Insufficient balance. 
-                                    <a href="{{ route('wallet.index') }}" class="underline">Add coins to your wallet</a>
-                                </p>
-                            @endif
-                        </div>
                     </div>
 
                     <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <button type="submit" 
-                                class="flex-1 bg-green-600 text-white py-3 rounded-md hover:bg-green-700 font-semibold text-sm sm:text-base"
-                                {{ auth()->user()->wallet_balance < $ground->rate_per_hour ? 'disabled' : '' }}>
+                                class="flex-1 bg-green-600 text-white py-3 rounded-md hover:bg-green-700 font-semibold text-sm sm:text-base">
                             <i class="fas fa-check"></i> Confirm Booking
                         </button>
                         <a href="{{ route('grounds.show', $ground) }}" 

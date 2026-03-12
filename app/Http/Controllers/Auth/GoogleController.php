@@ -61,7 +61,6 @@ class GoogleController extends Controller
                     'password' => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                     'role' => 'user',
-                    'wallet_balance' => 0,
                 ]);
                 $isNewUser = true;
 

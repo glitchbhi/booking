@@ -28,6 +28,9 @@ class AdminDashboardController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_amount');
 
+        // Admin commission (10% of total revenue)
+        $adminCommission = $totalRevenue * 0.10;
+
         // User statistics
         $totalUsers = User::where('role', 'user')->count();
         $totalOwners = User::where('role', 'owner')->where('owner_status', 'approved')->count();
@@ -98,6 +101,7 @@ class AdminDashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalRevenue',
+            'adminCommission',
             'totalUsers',
             'totalOwners',
             'pendingOwnerRequests',

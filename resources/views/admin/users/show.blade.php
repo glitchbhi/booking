@@ -20,11 +20,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-gray-50 rounded-md p-4">
-                <p class="text-sm text-gray-600">Wallet Balance</p>
-                <p class="text-2xl font-bold text-gray-900">BTN {{ number_format($user->wallet_balance, 2) }}</p>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="bg-gray-50 rounded-md p-4">
                 <p class="text-sm text-gray-600">Total Bookings</p>
                 <p class="text-2xl font-bold text-gray-900">{{ $user->bookings->count() }}</p>
