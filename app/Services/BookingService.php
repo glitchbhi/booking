@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Booking;
-use App\Models\BookingLock;
 use App\Models\Ground;
 use App\Models\User;
 use App\Notifications\BookingCancelled;
@@ -16,9 +15,6 @@ use Illuminate\Support\Facades\DB;
 
 class BookingService
 {
-    public function __construct(
-        protected WalletService $walletService
-    ) {}
 
     /**
      * Check if time slot is available
@@ -41,54 +37,7 @@ class BookingService
             $conflictingBookings->where('id', '!=', $excludeBookingId);
         }
 
-        if ($conflictingBookings->exists()) {
-            return false;
-        }
-
-        // Check for active locks
-        $activeLocks = BookingLock::where('ground_id', $ground->id)
-            ->where('locked_until', '>', now())
-            ->where(function ($query) use ($startTime, $endTime) {
-                $query->whereBetween('start_time', [$startTime, $endTime])
-                    ->orWhereBetween('end_time', [$startTime, $endTime])
-                    ->orWhere(function ($q) use ($startTime, $endTime) {
-                        $q->where('start_time', '<=', $startTime)
-                          ->where('end_time', '>=', $endTime);
-                    });
-            })
-            ->exists();
-
-        return !$activeLocks;
-    }
-
-    /**
-     * Lock a time slot for booking
-     */
-    public function lockSlot(Ground $ground, User $user, Carbon $startTime, Carbon $endTime, int $minutes = 10): BookingLock
-    {
-        // Release any expired locks first
-        $this->releaseExpiredLocks();
-
-        // Check if slot is available
-        if (!$this->isSlotAvailable($ground, $startTime, $endTime)) {
-            throw new \Exception('Time slot is not available');
-        }
-
-        return BookingLock::create([
-            'ground_id' => $ground->id,
-            'user_id' => $user->id,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'locked_until' => now()->addMinutes($minutes),
-        ]);
-    }
-
-    /**
-     * Release expired locks
-     */
-    public function releaseExpiredLocks(): int
-    {
-        return BookingLock::where('locked_until', '<=', now())->delete();
+        return !$conflictingBookings->exists();
     }
 
     /**
@@ -99,10 +48,9 @@ class BookingService
         User $user,
         Carbon $startTime,
         Carbon $endTime,
-        string $bookingType = 'online',
-        ?BookingLock $lock = null
+        string $bookingType = 'online'
     ): Booking {
-        return DB::transaction(function () use ($ground, $user, $startTime, $endTime, $bookingType, $lock) {
+        return DB::transaction(function () use ($ground, $user, $startTime, $endTime, $bookingType) {
             // Validate user can book
             if ($bookingType === 'online' && !$user->canBook()) {
                 throw new \Exception('Your account is suspended from booking');
@@ -142,18 +90,10 @@ class BookingService
                 $baseAmount = $baseAmount - $discount;
             }
             
-            // Add 3% platform fee
-            $platformFee = $baseAmount * 0.03;
-            $totalAmount = $baseAmount + $platformFee;
+            // Total amount (no platform fees for simplified system)
+            $totalAmount = $baseAmount;
             
             $effectiveRate = $durationHours > 0 ? $totalAmount / $durationHours : $ground->rate_per_hour;
-
-            // Deduct from wallet for online bookings
-            if ($bookingType === 'online') {
-                if ($user->wallet_balance < $totalAmount) {
-                    throw new \Exception('Insufficient wallet balance');
-                }
-            }
 
             // Create booking
             $booking = Booking::create([
@@ -168,29 +108,10 @@ class BookingService
                 'booking_type' => $bookingType,
             ]);
 
-            // Process payment for online bookings
-            if ($bookingType === 'online') {
-                $this->walletService->deductCoins(
-                    $user,
-                    $totalAmount,
-                    "Booking payment for {$ground->name}",
-                    $booking->id
-                );
-            }
-
             // Increment ground booking count
             $ground->incrementBookingCount();
 
-            // Release the lock if provided
-            if ($lock) {
-                $lock->delete();
-            }
-
-            return $booking;
-        });
-
-        // Send notifications after transaction completes (non-blocking, after response)
-        if ($bookingType === 'online') {
+            // Send notifications after transaction completes (non-blocking, after response)
             dispatch(function () use ($user, $ground, $booking) {
                 try {
                     $user->notify(new BookingConfirmation($booking));
@@ -206,9 +127,9 @@ class BookingService
                     \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
                 }
             })->afterResponse();
-        }
 
-        return $booking;
+            return $booking;
+        });
     }
 
     /**
@@ -216,7 +137,7 @@ class BookingService
      */
     public function cancelBooking(Booking $booking, string $reason = null): bool
     {
-        return DB::transaction(function () use ($booking, $reason) {
+        DB::transaction(function () use ($booking, $reason) {
             // Check if booking can be cancelled (must be at least 3 hours before start time)
             $hoursDiff = now()->diffInHours($booking->start_time, false);
             
@@ -228,30 +149,12 @@ class BookingService
                 throw new \Exception('Booking cannot be cancelled at this time');
             }
 
-            // Calculate refund with 3% cancellation fee
-            $cancellationFee = $booking->total_amount * 0.03;
-            $refundAmount = $booking->total_amount - $cancellationFee;
-
-            // Update booking
+            // Update booking status
             $booking->update([
                 'status' => 'cancelled',
                 'cancellation_reason' => $reason,
                 'cancelled_at' => now(),
-                'is_refunded' => true,
-                'refund_amount' => $refundAmount,
             ]);
-
-            // Process refund for online bookings
-            if ($booking->booking_type === 'online') {
-                $this->walletService->refundCoins(
-                    $booking->user,
-                    $refundAmount,
-                    "Refund for cancelled booking #{$booking->booking_number}",
-                    $booking->id
-                );
-            }
-            
-            return true;
         });
 
         // Send cancellation notifications after transaction (non-blocking)

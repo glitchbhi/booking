@@ -28,15 +28,8 @@ class BookingCancelled extends Notification
             ->line('Your booking has been cancelled.')
             ->line('Booking Number: ' . $this->booking->booking_number)
             ->line('Ground: ' . $this->booking->ground->name)
-            ->line('Original Amount: BTN ' . number_format($this->booking->total_amount, 2));
-
-        if ($this->booking->is_refunded) {
-            $message->line('Refund Amount: BTN ' . number_format($this->booking->refund_amount, 2))
-                    ->line('The refund has been credited to your wallet.');
-        } else {
-            $message->line('Refund: No refund (late cancellation)')
-                    ->line('Please note: Cancellations less than 4 hours before start time are not eligible for refunds.');
-        }
+            ->line('Amount: BTN ' . number_format($this->booking->total_amount, 2))
+            ->line('For refunds, please contact the ground owner directly.');
 
         return $message->action('View Booking', route('bookings.show', $this->booking))
                        ->line('Thank you for using Thunder Booking System!');

@@ -5,7 +5,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\WalletController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\GroundManagementController;
@@ -57,10 +56,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/bookings/{ground}/check-availability', [BookingController::class, 'checkAvailability'])->name('bookings.check-availability');
-    
-    // Wallet
-    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/add', [WalletController::class, 'addCoins'])->name('wallet.add');
     
     // Reviews - Available to all authenticated users
     Route::post('/reviews/{ground}', [ReviewController::class, 'store'])->name('reviews.store');

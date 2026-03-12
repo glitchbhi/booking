@@ -69,7 +69,6 @@
                     @auth
                     <div class="hidden md:flex space-x-6">
                         <a href="{{ route('bookings.index') }}" class="text-gray-600 hover:text-green-600 font-medium">My Bookings</a>
-                        <a href="{{ route('wallet.index') }}" class="text-gray-600 hover:text-green-600 font-medium">Wallet</a>
                     </div>
                     @endauth
                 </div>
@@ -99,9 +98,6 @@
                                 <div class="md:hidden border-b border-gray-100 pb-2 mb-2">
                                     <a href="{{ route('bookings.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <i class="fas fa-calendar-check w-5 inline-block"></i> My Bookings
-                                    </a>
-                                    <a href="{{ route('wallet.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-wallet w-5 inline-block"></i> Wallet
                                     </a>
                                     @if(Auth::user()->role === 'user' && Auth::user()->owner_status !== 'pending')
                                         <a href="{{ route('owner-request.create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

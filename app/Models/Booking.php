@@ -20,13 +20,10 @@ class Booking extends Model
         'duration_hours',
         'rate_per_hour',
         'total_amount',
-        'admin_commission',
         'status',
         'booking_type',
         'cancellation_reason',
         'cancelled_at',
-        'is_refunded',
-        'refund_amount',
         'is_no_show',
     ];
 
@@ -36,10 +33,7 @@ class Booking extends Model
         'duration_hours' => 'decimal:2',
         'rate_per_hour' => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'admin_commission' => 'decimal:2',
         'cancelled_at' => 'datetime',
-        'is_refunded' => 'boolean',
-        'refund_amount' => 'decimal:2',
         'is_no_show' => 'boolean',
     ];
 
@@ -51,9 +45,6 @@ class Booking extends Model
             if (!$booking->booking_number) {
                 $booking->booking_number = 'TB-' . strtoupper(Str::random(10));
             }
-            
-            // Calculate admin commission (2%)
-            $booking->admin_commission = $booking->total_amount * 0.02;
         });
     }
 
@@ -71,11 +62,6 @@ class Booking extends Model
     public function review()
     {
         return $this->hasOne(Review::class);
-    }
-
-    public function walletTransactions()
-    {
-        return $this->hasMany(WalletTransaction::class);
     }
 
     // Scopes

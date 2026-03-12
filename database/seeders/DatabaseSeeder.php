@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Thunder@booking123'),
             'role' => 'admin',
             'owner_status' => 'none',
-            'wallet_balance' => 0,
             'email_verified_at' => now(),
         ]);
 

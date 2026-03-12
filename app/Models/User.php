@@ -27,7 +27,6 @@ class User extends Authenticatable
         'is_suspended',
         'suspended_until',
         'late_cancel_count',
-        'wallet_balance',
         'google_id',
         'avatar',
     ];
@@ -54,7 +53,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'suspended_until' => 'datetime',
             'is_suspended' => 'boolean',
-            'wallet_balance' => 'decimal:2',
         ];
     }
 
@@ -67,11 +65,6 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class);
-    }
-
-    public function walletTransactions()
-    {
-        return $this->hasMany(WalletTransaction::class);
     }
 
     public function reviews()

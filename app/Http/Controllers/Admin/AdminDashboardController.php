@@ -28,11 +28,6 @@ class AdminDashboardController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_amount');
 
-        // Admin commission (2%)
-        $adminCommission = Booking::whereIn('status', ['completed'])
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('admin_commission');
-
         // User statistics
         $totalUsers = User::where('role', 'user')->count();
         $totalOwners = User::where('role', 'owner')->where('owner_status', 'approved')->count();
@@ -77,15 +72,14 @@ class AdminDashboardController extends Controller
         // Revenue chart data - database agnostic
         $revenueBookings = Booking::whereIn('status', ['completed'])
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->get(['created_at', 'total_amount', 'admin_commission']);
+            ->get(['created_at', 'total_amount']);
         
         $dailyRevenue = $revenueBookings->groupBy(function($booking) {
             return \Carbon\Carbon::parse($booking->created_at)->format('Y-m-d');
         })->map(function($group, $date) {
             return (object)[
                 'date' => $date,
-                'revenue' => $group->sum('total_amount'),
-                'commission' => $group->sum('admin_commission')
+                'revenue' => $group->sum('total_amount')
             ];
         })->sortBy('date')->values();
 
@@ -104,7 +98,6 @@ class AdminDashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalRevenue',
-            'adminCommission',
             'totalUsers',
             'totalOwners',
             'pendingOwnerRequests',
