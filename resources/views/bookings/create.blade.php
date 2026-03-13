@@ -10,7 +10,7 @@
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
                 <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Book {{ $ground->name }}</h1>
                 
-                <form action="{{ route('bookings.store', $ground) }}" method="POST" id="bookingForm" enctype="multipart/form-data">
+                <form action="{{ route('bookings.store', $ground) }}" method="POST" id="bookingForm">
                     @csrf
                     
                     <div class="mb-4 sm:mb-6">
@@ -106,39 +106,6 @@
                                     <i class="fas fa-percentage"></i> Get 10% discount on full-day bookings!
                                 </p>
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Payment Screenshot <span class="text-red-500">*</span>
-                            </label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                                <input type="file" 
-                                       name="payment_proof" 
-                                       id="payment_proof" 
-                                       accept="image/*"
-                                       class="hidden"
-                                       onchange="previewPaymentProof(this)">
-                                <label for="payment_proof" class="cursor-pointer">
-                                    <div id="upload-placeholder">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
-                                        <p class="text-sm text-gray-600">Click to upload payment screenshot</p>
-                                        <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 2MB</p>
-                                    </div>
-                                    <div id="preview-container" class="hidden">
-                                        <img id="preview-image" src="" alt="Payment proof" class="max-w-full h-48 mx-auto rounded">
-                                        <p class="text-sm text-green-600 mt-2">
-                                            <i class="fas fa-check-circle"></i> Screenshot uploaded
-                                        </p>
-                                    </div>
-                                </label>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-600">
-                                <i class="fas fa-info-circle"></i> Upload your payment confirmation screenshot. The ground owner will verify it.
-                            </p>
-                            @error('payment_proof')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
 
                         <div>
@@ -371,23 +338,5 @@
     document.getElementById('startTime').addEventListener('change', calculateTotal);
     document.getElementById('bookingDate').value = '{{ now()->format("Y-m-d") }}';
 
-    // Payment proof preview function
-    function previewPaymentProof(input) {
-        const placeholder = document.getElementById('upload-placeholder');
-        const previewContainer = document.getElementById('preview-container');
-        const previewImage = document.getElementById('preview-image');
-        
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                placeholder.classList.add('hidden');
-                previewContainer.classList.remove('hidden');
-            };
-            
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
 </script>
 @endsection

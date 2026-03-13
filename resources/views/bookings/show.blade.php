@@ -72,28 +72,33 @@
             </div>
         </div>
 
-        @if($booking->payment_proof)
-            <div class="mt-6 border-t pt-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Proof</h2>
+        <div class="mt-6 border-t pt-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Proof</h2>
+
+            @if($booking->payment_proof)
                 <div class="bg-gray-50 rounded-md p-4">
                     <div class="flex items-center justify-between mb-4">
                         <span class="text-gray-600 text-sm">
                             <i class="fas fa-check-circle text-green-600"></i> Payment screenshot uploaded
                         </span>
-                        <a href="{{ asset('storage/' . $booking->payment_proof) }}" 
-                           download 
+                        <a href="{{ asset('storage/' . $booking->payment_proof) }}"
+                           download
                            class="text-blue-600 hover:text-blue-800 text-sm">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </div>
-                    <img src="{{ asset('storage/' . $booking->payment_proof) }}" 
-                         alt="Payment Proof" 
+                    <img src="{{ asset('storage/' . $booking->payment_proof) }}"
+                         alt="Payment Proof"
                          class="max-w-full h-auto rounded border cursor-pointer hover:opacity-75"
                          onclick="window.open(this.src, '_blank')">
                     <p class="text-xs text-gray-500 mt-2 text-center">Click image to view full size</p>
                 </div>
-            </div>
-        @endif
+            @else
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-sm text-yellow-800">
+                    <i class="fas fa-info-circle"></i> No payment screenshot uploaded yet.
+                </div>
+            @endif
+        </div>
 
         @if($booking->review)
             <div class="mt-6 border-t pt-6">
@@ -112,9 +117,17 @@
             </div>
         @endif
 
-        <div class="mt-6 flex space-x-4">
+        <div class="mt-6 flex flex-wrap gap-2">
             <a href="{{ route('bookings.index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">
                 <i class="fas fa-arrow-left"></i> Back to Bookings
+            </a>
+            
+            <button onclick="printBooking()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                <i class="fas fa-print"></i> Print Booking
+            </button>
+            
+            <a href="{{ route('bookings.download', $booking) }}" class="inline-block bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+                <i class="fas fa-download"></i> Download as PDF
             </a>
             
             @if($booking->canBeCancelled())
@@ -137,4 +150,10 @@
         </div>
     </div>
 </div>
+
+<script>
+    function printBooking() {
+        window.print();
+    }
+</script>
 @endsection

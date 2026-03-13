@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/create/{ground}', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings/{ground}', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/download', [BookingController::class, 'downloadPDF'])->name('bookings.download');
+    Route::put('/bookings/{booking}/payment-proof', [BookingController::class, 'updatePaymentProof'])->name('bookings.payment-proof.update');
     Route::get('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/bookings/{ground}/check-availability', [BookingController::class, 'checkAvailability'])->name('bookings.check-availability');

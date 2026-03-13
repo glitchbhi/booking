@@ -61,4 +61,18 @@ class BookingPolicy
         // Can only review completed bookings
         return $booking->canBeReviewed();
     }
+
+    /**
+     * Determine if the user can upload or update payment proof
+     */
+    public function uploadPaymentProof(User $user, Booking $booking): bool
+    {
+        // Only the booking owner can upload payment proof
+        if ($user->id !== $booking->user_id) {
+            return false;
+        }
+
+        // Do not allow payment proof uploads for cancelled bookings
+        return $booking->status !== 'cancelled';
+    }
 }

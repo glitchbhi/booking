@@ -9,6 +9,7 @@ use App\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
@@ -86,6 +87,43 @@ class BookingController extends Controller
         $booking->load(['ground', 'user', 'review']);
 
         return view('bookings.show', compact('booking'));
+    }
+
+    public function downloadPDF(Booking $booking)
+    {
+        $this->authorize('view', $booking);
+
+        $booking->load(['ground', 'user', 'review']);
+
+        // Return a print-friendly view that user can save as PDF
+        return view('bookings.pdf', compact('booking'));
+    }
+
+    public function updatePaymentProof(Request $request, Booking $booking)
+    {
+        $this->authorize('uploadPaymentProof', $booking);
+
+        $validated = $request->validate([
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'payment_proof.required' => 'Please select a payment screenshot to upload.',
+            'payment_proof.image' => 'Payment proof must be an image.',
+            'payment_proof.max' => 'Payment proof image must not exceed 2MB.',
+        ]);
+
+        if ($booking->payment_proof && Storage::disk('public')->exists($booking->payment_proof)) {
+            Storage::disk('public')->delete($booking->payment_proof);
+        }
+
+        $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+
+        $booking->update([
+            'payment_proof' => $paymentProofPath,
+        ]);
+
+        return redirect()
+            ->route('bookings.show', $booking)
+            ->with('success', 'Payment screenshot uploaded successfully.');
     }
 
     public function index()

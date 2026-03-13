@@ -18,19 +18,20 @@ class BookingService
 
     /**
      * Check if time slot is available
+     * Allows back-to-back bookings (one ending at 3:30 and another starting at 3:30)
      */
     public function isSlotAvailable(Ground $ground, Carbon $startTime, Carbon $endTime, ?int $excludeBookingId = null): bool
     {
         // Check for conflicting bookings
+        // A booking conflicts only if: new_start < existing_end AND new_end > existing_start
+        // This allows back-to-back bookings (no overlap at exact boundaries)
         $conflictingBookings = Booking::where('ground_id', $ground->id)
             ->whereIn('status', ['booked', 'ongoing'])
             ->where(function ($query) use ($startTime, $endTime) {
-                $query->whereBetween('start_time', [$startTime, $endTime])
-                    ->orWhereBetween('end_time', [$startTime, $endTime])
-                    ->orWhere(function ($q) use ($startTime, $endTime) {
-                        $q->where('start_time', '<=', $startTime)
-                          ->where('end_time', '>=', $endTime);
-                    });
+                $query->where(function ($q) use ($startTime, $endTime) {
+                    $q->where('start_time', '<', $endTime)
+                      ->where('end_time', '>', $startTime);
+                });
             });
 
         if ($excludeBookingId) {
