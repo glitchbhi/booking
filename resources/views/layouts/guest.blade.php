@@ -4,12 +4,40 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
 
         <title>{{ config('app.name', 'Thunder Booking') }}</title>
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .logo-circular {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #0066cc;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                flex-shrink: 0;
+            }
+            .logo-circular img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            @media (min-width: 640px) {
+                .logo-circular {
+                    width: 48px;
+                    height: 48px;
+                    border-width: 3px;
+                }
+            }
+        </style>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
             .auth-bg {
@@ -61,10 +89,12 @@
                         <!-- Header -->
                         <div class="flex justify-between items-center px-5 py-3 border-b">
                             <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
-                                <i class="fas fa-bolt text-lg text-green-500"></i>
-                                <span class="text-base font-bold text-gray-900">Thunder Booking</span>
+                                <div class="logo-circular" style="width: 40px; height: 40px; border: 2px solid #0066cc;">
+                                    <img src="{{ asset('images/logo.png') }}" alt="Thunder Booking">
+                                </div>
+                                <span class="text-sm sm:text-base font-bold text-gray-900 hidden sm:inline">Thunder Booking</span>
                             </a>
-                            <a href="{{ route('welcome') }}" class="text-gray-500 hover:text-green-600 text-xs">
+                            <a href="{{ route('welcome') }}" class="text-gray-500 hover:text-blue-600 text-xs">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
                             </a>
                         </div>

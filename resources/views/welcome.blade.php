@@ -3,9 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <title>Thunder Booking - Find & Book Sports Facilities in Bhutan</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    <title>Thunder Booking</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circular {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #0066cc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        .logo-circular img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        @media (min-width: 640px) {
+            .logo-circular {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -63,8 +90,10 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-4 sm:space-x-8">
                     <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
-                        <i class="fas fa-bolt text-xl sm:text-2xl text-green-500"></i>
-                        <span class="text-lg sm:text-xl font-bold text-gray-900">ThunderBooking</span>
+                        <div class="logo-circular">
+                            <img src="{{ asset('images/logo.png') }}" alt="Thunder Booking">
+                        </div>
+                        <span class="text-lg sm:text-xl font-bold text-gray-900 hidden sm:inline">ThunderBooking</span>
                     </a>
                     @auth
                     <div class="hidden md:flex space-x-6">

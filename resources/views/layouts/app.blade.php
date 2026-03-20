@@ -3,8 +3,37 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">    <link rel=\"icon\" type=\"image/x-icon\" href=\"{{ asset('favicon.ico') }}\">    <title>{{ config('app.name', 'Thunder Booking') }} - @yield('title', 'Sports Ground Booking')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    <title>{{ config('app.name', 'Thunder Booking') }} - @yield('title', 'Sports Ground Booking')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .logo-circular {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #0066cc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        .logo-circular img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        @media (min-width: 640px) {
+            .logo-circular {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
@@ -18,8 +47,11 @@
                 <div class="flex justify-between h-16">
                     <div class="flex">
                         <div class="flex-shrink-0 flex items-center">
-                            <a href="{{ route('welcome') }}" class="text-2xl font-bold text-green-600">
-                                <i class="fas fa-bolt"></i> Thunder Booking
+                            <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
+                                <div class="logo-circular">
+                                    <img src="{{ asset('images/logo.png') }}" alt="Thunder Booking">
+                                </div>
+                                <span class="text-xl sm:text-2xl font-bold text-blue-600 hidden sm:inline">Thunder Booking</span>
                             </a>
                         </div>
                     </div>

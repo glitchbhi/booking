@@ -5,8 +5,11 @@
             <div class="flex items-center">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('welcome') }}" class="text-xl sm:text-2xl font-bold text-green-600 flex items-center">
-                        <i class="fas fa-bolt"></i> <span class="ml-1">Thunder Booking</span>
+                    <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
+                        <div class="logo-circular">
+                            <img src="{{ asset('images/logo.png') }}" alt="Thunder Booking">
+                        </div>
+                        <span class="text-xl sm:text-2xl font-bold text-blue-600 hidden sm:inline">Thunder Booking</span>
                     </a>
                 </div>
 
