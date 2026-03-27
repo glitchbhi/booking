@@ -30,13 +30,18 @@
             <div class="mt-6">
                 <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
 
-                <x-text-input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
+                <div class="relative mt-1 w-3/4">
+                    <x-text-input
+                        id="password"
+                        name="password"
+                        type="password"
+                        class="block w-full pr-10"
+                        placeholder="{{ __('Password') }}"
+                    />
+                    <button type="button" onclick="toggleDeletePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <i id="eye-icon-delete-password" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                    </button>
+                </div>
 
                 <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
             </div>
@@ -52,4 +57,21 @@
             </div>
         </form>
     </x-modal>
+
+    <script>
+        function toggleDeletePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon-delete-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </section>

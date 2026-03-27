@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\GroundManagementController as AdminGroundManagementController;
 use App\Http\Controllers\Admin\BookingManagementController as AdminBookingManagementController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\SystemRatingController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,10 @@ Route::get('/dashboard', function () {
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
+    // Set password for OAuth users
+    Route::get('/set-password', [SetPasswordController::class, 'create'])->name('password.set.create');
+    Route::post('/set-password', [SetPasswordController::class, 'store'])->name('password.set.store');
+
     // Profile routes (from Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

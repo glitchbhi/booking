@@ -33,20 +33,35 @@
         @if(!Auth::user()->isGoogleUser() || Auth::user()->hasSetPassword())
             <div>
                 <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-                <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+                <div class="relative mt-1">
+                    <x-text-input id="update_password_current_password" name="current_password" type="password" class="block w-full pr-10" autocomplete="current-password" />
+                    <button type="button" onclick="togglePassword('update_password_current_password', 'eye-icon-current-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <i id="eye-icon-current-password" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                    </button>
+                </div>
                 <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
             </div>
         @endif
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <div class="relative mt-1">
+                <x-text-input id="update_password_password" name="password" type="password" class="block w-full pr-10" autocomplete="new-password" />
+                <button type="button" onclick="togglePassword('update_password_password', 'eye-icon-new-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <i id="eye-icon-new-password" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                </button>
+            </div>
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
         </div>
 
         <div>
             <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <div class="relative mt-1">
+                <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="block w-full pr-10" autocomplete="new-password" />
+                <button type="button" onclick="togglePassword('update_password_password_confirmation', 'eye-icon-confirm-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <i id="eye-icon-confirm-password" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                </button>
+            </div>
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
         </div>
 
@@ -72,4 +87,21 @@
             @endif
         </div>
     </form>
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(iconId);
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </section>

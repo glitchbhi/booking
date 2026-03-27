@@ -7,8 +7,6 @@ use App\Models\User;
 use App\Notifications\AccountCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
@@ -52,13 +50,13 @@ class GoogleController extends Controller
                     ]);
                 }
             } else {
-                // Create new user
+                // Create new user with NULL password
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
-                    'password' => Hash::make(Str::random(24)),
+                    'password' => null,  // NULL for OAuth users without password set
                     'email_verified_at' => now(),
                     'role' => 'user',
                 ]);
@@ -71,8 +69,14 @@ class GoogleController extends Controller
             // Login the user
             Auth::login($user, true);
 
+            // If new user and password not set, redirect to set password page
+            if ($isNewUser && is_null($user->password)) {
+                return redirect()->route('password.set.create')
+                    ->with('info', 'Welcome! Please set a password to enable login with email and password.');
+            }
+
             if ($isNewUser) {
-                return redirect()->route('welcome')->with('success', 'Welcome, ' . $user->name . '! You can set a password in your profile to enable login without Google.');
+                return redirect()->route('welcome')->with('success', 'Welcome, ' . $user->name . '!');
             }
 
             return redirect()->route('welcome')->with('success', 'Welcome back, ' . $user->name . '!');

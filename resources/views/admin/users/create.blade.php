@@ -47,9 +47,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-                    <input type="password" name="password" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="Enter password (min 8 characters)">
+                    <div class="relative">
+                        <input id="password" type="password" name="password" required
+                               class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="Enter password (min 8 characters)">
+                        <button type="button" onclick="togglePassword('password', 'eye-icon-password')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="eye-icon-password" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -57,9 +62,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
-                    <input type="password" name="password_confirmation" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="Confirm password">
+                    <div class="relative">
+                        <input id="password_confirmation" type="password" name="password_confirmation" required
+                               class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                               placeholder="Confirm password">
+                        <button type="button" onclick="togglePassword('password_confirmation', 'eye-icon-password-confirmation')" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="eye-icon-password-confirmation" class="fas fa-eye text-gray-400 hover:text-gray-600 text-sm"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
@@ -83,4 +93,21 @@
         </form>
     </div>
 </div>
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const eyeIcon = document.getElementById(iconId);
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+</script>
 @endsection
