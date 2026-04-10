@@ -165,6 +165,30 @@
         </div>
     </nav>
 
+    <!-- Success Modal -->
+    @if(session('success'))
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-data="{ show: true }" x-show="show">
+        <div class="bg-white rounded-lg shadow-2xl max-w-md w-full mx-4">
+            <div class="bg-green-50 border-b border-green-200 p-6 flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Success!</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 text-center mb-6">{{ session('success') }}</p>
+            </div>
+            <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-center">
+                <button @click="show = false" onclick="window.location.href='{{ route('welcome') }}'" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Hero Section -->
     <section class="hero-bg pt-32 pb-40 text-white">
         <div class="container-tv max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 text-center">
