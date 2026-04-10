@@ -3,14 +3,11 @@
 namespace App\Notifications;
 
 use App\Models\OwnerRequest;
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewOwnerRequest extends Notification
 {
-    use Queueable;
-
     public function __construct(
         public OwnerRequest $ownerRequest
     ) {}

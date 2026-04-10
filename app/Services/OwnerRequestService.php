@@ -64,30 +64,34 @@ class OwnerRequestService
     }
 
     /**
-     * Send owner request notifications (called after transaction)
+     * Send owner request notifications
      */
     private function sendOwnerRequestNotifications($ownerRequest, $user)
     {
-        // Notify all admins about the new request (non-blocking)
-        dispatch(function () use ($ownerRequest) {
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                try {
-                    $admin->notify(new NewOwnerRequest($ownerRequest));
-                } catch (\Exception $e) {
-                    \Log::warning('Admin notification email failed: ' . $e->getMessage());
-                }
-            }
-        })->afterResponse();
-        
-        // Notify the user that request was submitted (non-blocking)
-        dispatch(function () use ($ownerRequest, $user) {
+        // Notify all admins about the new request
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
             try {
-                $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
+                $admin->notify(new NewOwnerRequest($ownerRequest));
             } catch (\Exception $e) {
-                \Log::warning('Owner request submitted email failed: ' . $e->getMessage());
+                \Log::warning('Admin notification email failed: ' . $e->getMessage(), [
+                    'admin_id' => $admin->id,
+                    'owner_request_id' => $ownerRequest->id,
+                    'error' => $e->getMessage()
+                ]);
             }
-        })->afterResponse();
+        }
+        
+        // Notify the user that request was submitted
+        try {
+            $user->notify(new \App\Notifications\OwnerRequestSubmitted($ownerRequest));
+        } catch (\Exception $e) {
+            \Log::warning('Owner request submitted email failed: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'owner_request_id' => $ownerRequest->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**

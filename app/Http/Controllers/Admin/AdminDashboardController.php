@@ -34,7 +34,7 @@ class AdminDashboardController extends Controller
         // User statistics
         $totalUsers = User::where('role', 'user')->count();
         $totalOwners = User::where('role', 'owner')->where('owner_status', 'approved')->count();
-        $pendingOwnerRequests = User::where('owner_status', 'pending')->count();
+        $pendingOwnerRequests = OwnerRequest::where('status', 'pending')->count();
         $suspendedUsers = User::where('is_suspended', true)->count();
 
         // Booking statistics

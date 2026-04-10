@@ -17,24 +17,36 @@
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-gray-900">{{ $request->user->name }}</h3>
                                 <p class="text-gray-600 mt-1"><strong>Email:</strong> {{ $request->user->email }}</p>
-                                <p class="text-gray-600"><strong>Business:</strong> {{ $request->business_name }}</p>
+                                <p class="text-gray-600"><strong>Ground Name:</strong> {{ $request->ground_name }}</p>
+                                <p class="text-gray-600"><strong>Category:</strong> {{ $request->category }}</p>
                                 <p class="text-gray-600"><strong>Address:</strong> {{ $request->business_address }}</p>
-                                <p class="text-gray-600"><strong>Phone:</strong> {{ $request->phone }}</p>
-                                @if($request->additional_info)
-                                    <p class="text-gray-600 mt-2"><strong>Additional Info:</strong> {{ $request->additional_info }}</p>
+                                <p class="text-gray-600"><strong>Contact:</strong> {{ $request->contact_number }}</p>
+                                <p class="text-gray-600"><strong>Opening Time:</strong> {{ $request->opening_time }} - {{ $request->closing_time }}</p>
+                                <p class="text-gray-600"><strong>Day Pricing:</strong> BTN {{ number_format($request->price_day, 2) }} /hour</p>
+                                @if($request->available_at_night)
+                                    <p class="text-gray-600"><strong>Night Pricing:</strong> BTN {{ number_format($request->price_night, 2) }} /hour</p>
+                                @endif
+                                @if($request->reason)
+                                    <p class="text-gray-600 mt-2"><strong>Reason:</strong> {{ $request->reason }}</p>
+                                @endif
+                                @if($request->business_details)
+                                    <p class="text-gray-600"><strong>Business Details:</strong> {{ $request->business_details }}</p>
                                 @endif
                                 <p class="text-sm text-gray-400 mt-2">Requested {{ $request->created_at->diffForHumans() }}</p>
                             </div>
-                            <div class="flex space-x-2 ml-4">
+                            <div class="flex flex-col space-y-2 ml-4">
+                                <a href="{{ route('admin.owner-requests.show', $request) }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-center">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
                                 <form action="{{ route('admin.owner-requests.approve', $request) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                                    <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                                         <i class="fas fa-check"></i> Approve
                                     </button>
                                 </form>
                                 <form action="{{ route('admin.owner-requests.reject', $request) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                                    <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
                                         <i class="fas fa-times"></i> Reject
                                     </button>
                                 </form>
@@ -60,18 +72,19 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Business</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ground Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($allRequests as $request)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $request->user->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $request->business_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $request->phone }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $request->ground_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $request->contact_number }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 py-1 text-xs rounded-full
                                         {{ $request->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
@@ -81,6 +94,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $request->created_at->format('M d, Y') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <a href="{{ route('admin.owner-requests.show', $request) }}" class="text-blue-600 hover:text-blue-900">
+                                        View
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
