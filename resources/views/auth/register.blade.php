@@ -27,7 +27,7 @@
                 </div>
                 <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
                        class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                       placeholder="Karma Dorji">
+                       placeholder="Krishna prasad">
             </div>
             <x-input-error :messages="$errors->get('name')" class="mt-1" />
         </div>
@@ -41,7 +41,7 @@
                 </div>
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
                        class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                       placeholder="karma@example.com">
+                       placeholder="thunder@gmail.com">
             </div>
             <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>

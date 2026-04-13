@@ -61,26 +61,7 @@
                             </div>
                             
                             <!-- Testimonial Card -->
-                            <div class="absolute bottom-6 left-6 right-6">
-                                <div class="bg-white/95 backdrop-blur rounded-lg p-3 shadow-xl">
-                                    <div class="flex items-center mb-1">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm">
-                                            K
-                                        </div>
-                                        <div class="ml-2">
-                                            <p class="font-semibold text-gray-900 text-xs">Karma Dorji</p>
-                                            <div class="flex text-yellow-400 text-[10px]">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="text-gray-600 text-xs italic">"Thunder Booking made finding a turf incredibly simple!"</p>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                     
