@@ -208,13 +208,6 @@
                         </select>
                     </div>
                     <div class="flex-1">
-                        <label class="block text-left text-xs 2xl:text-sm text-gray-500 mb-1 2xl:mb-2 uppercase tracking-wide">Location</label>
-                        <div class="relative">
-                            <i class="fas fa-map-marker-alt absolute left-4 2xl:left-6 top-1/2 -translate-y-1/2 text-gray-400 text-base 2xl:text-xl"></i>
-                            <input type="text" name="location" placeholder="Thimphu, Paro, Punakha..." class="w-full pl-10 2xl:pl-14 pr-4 2xl:pr-6 py-3 2xl:py-5 3xl:py-6 border border-gray-200 rounded-lg 2xl:rounded-xl text-gray-700 text-base 2xl:text-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                        </div>
-                    </div>
-                    <div class="flex-1">
                         <label class="block text-left text-xs 2xl:text-sm text-gray-500 mb-1 2xl:mb-2 uppercase tracking-wide">Search</label>
                         <input type="text" name="search" placeholder="Ground name..." class="w-full px-4 2xl:px-6 py-3 2xl:py-5 3xl:py-6 border border-gray-200 rounded-lg 2xl:rounded-xl text-gray-700 text-base 2xl:text-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>

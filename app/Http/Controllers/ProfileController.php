@@ -38,7 +38,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Delete the user's account permanently from database.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -50,11 +50,18 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        // Delete all related data first
+        $user->bookings()->delete();
+        $user->reviews()->delete();
+        $user->systemRating()->delete();
+        $user->grounds()->delete();
+
+        // Permanently delete the user account from database
+        $user->forceDelete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return Redirect::to('/')->with('status', 'account-deleted');
     }
 }
