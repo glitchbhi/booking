@@ -37,4 +37,37 @@ class SystemRating extends Model
     {
         return static::count();
     }
+
+    // Get rating distribution
+    public static function getRatingDistribution()
+    {
+        $distribution = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $distribution[$i] = static::where('rating', $i)->count();
+        }
+        return $distribution;
+    }
+
+    // Get rating percentage
+    public static function getRatingPercentage($rating)
+    {
+        $total = static::getTotalCount();
+        if ($total === 0) {
+            return 0;
+        }
+        $count = static::where('rating', $rating)->count();
+        return round(($count / $total) * 100, 2);
+    }
+
+    // Check if user has rated
+    public static function hasUserRated($userId)
+    {
+        return static::where('user_id', $userId)->exists();
+    }
+
+    // Get user's rating
+    public static function getUserRating($userId)
+    {
+        return static::where('user_id', $userId)->first();
+    }
 }

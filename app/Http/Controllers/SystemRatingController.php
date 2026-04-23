@@ -48,7 +48,15 @@ class SystemRatingController extends Controller
             $existingRating = SystemRating::where('user_id', auth()->id())->first();
 
             if ($existingRating) {
-                return back()->with('error', 'You have already rated the system. Delete your previous rating to submit a new one.');
+                // Update existing rating
+                $existingRating->update([
+                    'rating' => $validated['rating'],
+                    'comment' => $validated['comment'],
+                ]);
+
+                return redirect()
+                    ->route('system-ratings.index')
+                    ->with('success', 'Thank you for updating your rating!');
             }
 
             SystemRating::create([
@@ -79,6 +87,6 @@ class SystemRatingController extends Controller
 
         return redirect()
             ->route('system-ratings.index')
-            ->with('success', 'Rating deleted successfully. You can now submit a new rating if you wish.');
+            ->with('success', 'Rating deleted successfully.');
     }
 }

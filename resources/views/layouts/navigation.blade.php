@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('bookings.index')" :active="request()->routeIs('bookings.*')">
                         {{ __('Bookings') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('system-ratings.index')" :active="request()->routeIs('system-ratings.*')">
+                        {{ __('Ratings') }}
+                    </x-nav-link>
                     
                     @if(Auth::user()->role === 'user' && Auth::user()->owner_status !== 'pending')
                         <x-nav-link :href="route('owner-request.create')" :active="request()->routeIs('owner-request.*')">
@@ -66,6 +69,9 @@
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('bookings.index')">
                                 <i class="fas fa-calendar-check w-5"></i> {{ __('My Bookings') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('system-ratings.index')">
+                                <i class="fas fa-star w-5"></i> {{ __('Ratings') }}
                             </x-dropdown-link>
                             
                             @if(Auth::user()->role === 'user' && Auth::user()->owner_status !== 'pending')

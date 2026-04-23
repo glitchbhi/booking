@@ -50,31 +50,112 @@
     <!-- User's Rating Section -->
     @if($userRating)
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-            <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
-                <i class="fas fa-info-circle mr-2"></i> Your System Rating
+            <h3 class="font-semibold text-blue-900 mb-4 flex items-center">
+                <i class="fas fa-check-circle mr-2"></i> Your System Rating
             </h3>
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex text-yellow-400 mb-2">
-                        @for($i = 1; $i <= 5; $i++)
-                            <i class="{{ $i <= $userRating->rating ? 'fas' : 'far' }} fa-star text-xl"></i>
-                        @endfor
-                        <span class="ml-2 text-gray-600 text-sm">{{ $userRating->rating }} / 5</span>
+            
+            <!-- Display Current Rating -->
+            <div class="mb-6 pb-6 border-b border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex text-yellow-400 mb-2">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="{{ $i <= $userRating->rating ? 'fas' : 'far' }} fa-star text-xl"></i>
+                            @endfor
+                            <span class="ml-2 text-gray-600 text-sm">{{ $userRating->rating }} / 5</span>
+                        </div>
+                        @if($userRating->comment)
+                            <p class="text-gray-700 text-sm mb-2">{{ $userRating->comment }}</p>
+                        @endif
+                        <p class="text-xs text-gray-500">Last updated {{ $userRating->updated_at->diffForHumans() }}</p>
                     </div>
-                    @if($userRating->comment)
-                        <p class="text-gray-700 text-sm mb-2">{{ $userRating->comment }}</p>
-                    @endif
-                    <p class="text-xs text-gray-500">Submitted {{ $userRating->created_at->diffForHumans() }}</p>
                 </div>
-                <form action="{{ route('system-ratings.destroy', $userRating) }}" method="POST" 
-                      onsubmit="return confirm('Are you sure you want to delete your rating?')">
+            </div>
+
+            <!-- Update Rating Form -->
+            <div x-data="{ isEditing: false }">
+                <button 
+                    type="button"
+                    @click="isEditing = !isEditing"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center"
+                >
+                    <i class="fas fa-edit mr-2"></i> Update Rating
+                </button>
+
+                <form 
+                    x-show="isEditing"
+                    x-transition
+                    action="{{ route('system-ratings.store') }}" 
+                    method="POST" 
+                    class="mt-4 p-4 bg-white rounded-lg border border-blue-200"
+                    x-data="{ rating: {{ $userRating->rating }}, hoveredRating: 0 }"
+                >
                     @csrf
-                    @method('DELETE')
-                    <button type="submit" 
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition flex items-center">
-                        <i class="fas fa-trash mr-2"></i> Delete & Re-rate
-                    </button>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">New Rating</label>
+                        <div class="flex items-center space-x-2">
+                            @for($i = 1; $i <= 5; $i++)
+                                <button 
+                                    type="button"
+                                    @click="rating = {{ $i }}"
+                                    @mouseenter="hoveredRating = {{ $i }}"
+                                    @mouseleave="hoveredRating = 0"
+                                    class="text-4xl focus:outline-none transition-colors"
+                                >
+                                    <i :class="(hoveredRating >= {{ $i }} || (hoveredRating === 0 && rating >= {{ $i }})) ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300'"></i>
+                                </button>
+                            @endfor
+                            <span class="ml-3 text-sm text-gray-600">
+                                <span x-text="rating"></span> / 5
+                            </span>
+                        </div>
+                        <input type="hidden" name="rating" :value="rating" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Feedback</label>
+                        <textarea 
+                            name="comment" 
+                            rows="3" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Update your feedback..."
+                        >{{ $userRating->comment }}</textarea>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <button 
+                            type="submit"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                        >
+                            <i class="fas fa-save mr-2"></i> Update
+                        </button>
+                        <button 
+                            type="button"
+                            @click="isEditing = false"
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </form>
+
+                <div x-show="!isEditing" class="mt-4 pt-4 border-t border-blue-200">
+                    <form 
+                        action="{{ route('system-ratings.destroy', $userRating) }}" 
+                        method="POST" 
+                        onsubmit="return confirm('Are you sure you want to delete your rating?')"
+                    >
+                        @csrf
+                        @method('DELETE')
+                        <button 
+                            type="submit" 
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition"
+                        >
+                            <i class="fas fa-trash mr-2"></i> Delete Rating
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     @else
