@@ -77,7 +77,7 @@
                 </form>
             </div>
         </div>
-    @else
+    @elseif(auth()->check())
         <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
             <h3 class="font-semibold text-gray-900 mb-4 flex items-center text-lg">
                 <i class="fas fa-pen mr-2 text-green-600"></i> Rate Our System
@@ -127,6 +127,31 @@
                     <i class="fas fa-paper-plane mr-2"></i> Submit Rating
                 </button>
             </form>
+        </div>
+    @else
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <h3 class="font-semibold text-gray-900 mb-4 flex items-center text-lg">
+                <i class="fas fa-star mr-2 text-yellow-400"></i> Rate Our System
+            </h3>
+            <div class="flex flex-col items-center text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-lock text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-600 mb-6">To rate our system and help us improve, please log in to your account.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="{{ route('login') }}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login to Rate
+                    </a>
+                    <a href="{{ route('register') }}" 
+                       class="inline-flex items-center justify-center px-6 py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition">
+                        <i class="fas fa-user-plus mr-2"></i> Create Account
+                    </a>
+                </div>
+                <p class="text-xs text-gray-500 mt-6">
+                    <i class="fas fa-info-circle mr-1"></i> Your feedback helps us provide better service to all users
+                </p>
+            </div>
         </div>
     @endif
 

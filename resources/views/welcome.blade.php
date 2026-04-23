@@ -192,7 +192,7 @@
     <!-- Hero Section -->
     <section class="hero-bg pt-32 pb-40 text-white">
         <div class="container-tv max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 text-center">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl 3xl:text-9xl font-bold mb-6 lg:mb-8 2xl:mb-12 leading-tight">Find & Book the Best Sports<br class="hidden sm:block">Facilities in Bhutan</h1>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-6xl 3xl:text-7xl font-bold mb-6 lg:mb-8 2xl:mb-12 leading-tight">Find & Book the Best Sports<br class="hidden sm:block">Facilities in Bhutan</h1>
             <p class="text-base sm:text-lg md:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl text-gray-200 mb-12 2xl:mb-16 3xl:mb-20 max-w-3xl 2xl:max-w-5xl mx-auto">Instant access to football turfs, cricket grounds, archery ranges, and more.</p>
             
             <!-- Search Box -->
@@ -470,7 +470,8 @@
                                     {{ number_format($systemAverage, 1) }}
                                 </div>
                                 <div>
-                                    <div class="flex text-yellow-400 text-2xl 2xl:text-4xl 3xl:text-5xl mb-2">
+                                    <div class="flex text-yellow-400 text-2xl 2xl:text-4xl 3xl:text-5xl mb-2 cursor-pointer hover:opacity-80 transition" 
+                                         onclick="handleStarClick()">
                                         @for($i = 1; $i <= 5; $i++)
                                             @if($i <= floor($systemAverage))
                                                 <i class="fas fa-star"></i>
@@ -486,6 +487,16 @@
                                     </p>
                                 </div>
                             </div>
+                            
+                            <script>
+                                function handleStarClick() {
+                                    @auth
+                                        window.location.href = "{{ route('system-ratings.index') }}";
+                                    @else
+                                        window.location.href = "{{ route('login') }}";
+                                    @endauth
+                                }
+                            </script>
                             <p class="text-gray-700 text-base 2xl:text-xl 3xl:text-2xl font-medium">Thunder Booking System</p>
                         </div>
                         
@@ -495,17 +506,11 @@
                                 <i class="fas fa-eye mr-2"></i> View All Ratings
                             </a>
                             @auth
-                                @if(auth()->user()->hasVerifiedEmail())
-                                    @if(!auth()->user()->systemRating)
-                                        <a href="{{ route('system-ratings.index') }}" 
-                                           class="inline-flex items-center justify-center px-6 2xl:px-8 py-3 2xl:py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg 2xl:rounded-xl shadow-lg transition transform hover:scale-105 text-base 2xl:text-xl 3xl:text-2xl">
-                                            <i class="fas fa-plus mr-2"></i> Rate System
-                                        </a>
-                                    @endif
-                                @else
-                                    <span class="inline-flex items-center justify-center px-6 2xl:px-8 py-3 2xl:py-4 bg-yellow-100 text-yellow-800 font-medium rounded-lg 2xl:rounded-xl text-sm 2xl:text-base 3xl:text-lg">
-                                        <i class="fas fa-envelope mr-2"></i> Verify email to rate
-                                    </span>
+                                @if(!auth()->user()->systemRating)
+                                    <a href="{{ route('system-ratings.index') }}" 
+                                       class="inline-flex items-center justify-center px-6 2xl:px-8 py-3 2xl:py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg 2xl:rounded-xl shadow-lg transition transform hover:scale-105 text-base 2xl:text-xl 3xl:text-2xl">
+                                        <i class="fas fa-plus mr-2"></i> Rate System
+                                    </a>
                                 @endif
                             @else
                                 <a href="{{ route('login') }}" 
