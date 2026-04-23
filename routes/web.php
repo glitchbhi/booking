@@ -68,8 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/{ground}', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     
-    // System Ratings - Available to all authenticated users with verified email
-    Route::get('/system-ratings', [SystemRatingController::class, 'index'])->name('system-ratings.index');
+    // System Ratings - Viewing available to everyone, posting/deleting requires auth
     Route::post('/system-ratings', [SystemRatingController::class, 'store'])->name('system-ratings.store');
     Route::delete('/system-ratings/{systemRating}', [SystemRatingController::class, 'destroy'])->name('system-ratings.destroy');
     
@@ -77,6 +76,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/owner-request/create', [OwnerRequestController::class, 'create'])->name('owner-request.create');
     Route::post('/owner-request', [OwnerRequestController::class, 'store'])->name('owner-request.store');
 });
+
+// Public rating route - available to everyone
+Route::get('/system-ratings', [SystemRatingController::class, 'index'])->name('system-ratings.index');
 
 // Owner routes
 Route::middleware(['auth', 'owner'])->prefix('owner')->name('owner.')->group(function () {

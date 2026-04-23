@@ -9,33 +9,23 @@ class SystemRatingController extends Controller
 {
     public function index()
     {
-        // Check if user is authenticated and email verified
-        if (!auth()->check()) {
-            return redirect()->route('login')->with('error', 'Please login to view ratings');
-        }
-
-        if (!auth()->user()->hasVerifiedEmail()) {
-            return redirect()->back()->with('error', 'Please verify your email address to view ratings');
-        }
-
         $averageRating = SystemRating::getAverageRating();
         $totalRatings = SystemRating::getTotalCount();
         $ratings = SystemRating::with('user')->latest()->paginate(10);
         
-        $userRating = auth()->user()->systemRating;
+        $userRating = null;
+        if (auth()->check()) {
+            $userRating = auth()->user()->systemRating;
+        }
 
         return view('system-ratings.index', compact('averageRating', 'totalRatings', 'ratings', 'userRating'));
     }
 
     public function store(Request $request)
     {
-        // Check if user is authenticated and email verified
+        // Check if user is authenticated
         if (!auth()->check()) {
             return redirect()->route('login')->with('error', 'Please login to submit a rating');
-        }
-
-        if (!auth()->user()->hasVerifiedEmail()) {
-            return redirect()->back()->with('error', 'Please verify your email address to submit ratings');
         }
 
         $validated = $request->validate([
