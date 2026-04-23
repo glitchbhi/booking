@@ -14,7 +14,8 @@ class GroundController extends Controller
     public function browse(Request $request)
     {
         $query = Ground::with(['owner', 'sportType'])
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->currentlyAvailable();
 
         // Search by name or location
         if ($request->filled('search')) {
@@ -78,12 +79,14 @@ class GroundController extends Controller
 
         // Get trending grounds (last 7 days)
         $trendingGrounds = Ground::active()
+            ->currentlyAvailable()
             ->trending(7)
             ->limit(6)
             ->get();
 
         // Get best-rated grounds
         $bestGrounds = Ground::active()
+            ->currentlyAvailable()
             ->best()
             ->limit(6)
             ->get();
@@ -93,6 +96,7 @@ class GroundController extends Controller
         
         // Get unique capacities for filter
         $capacities = Ground::active()
+            ->currentlyAvailable()
             ->whereNotNull('capacity')
             ->distinct()
             ->pluck('capacity')
@@ -117,7 +121,9 @@ class GroundController extends Controller
 
     public function index(Request $request)
     {
-        $query = Ground::with(['owner', 'sportType'])->where('is_active', true);
+        $query = Ground::with(['owner', 'sportType'])
+            ->where('is_active', true)
+            ->currentlyAvailable();
 
         // Apply filters
         if ($request->filled('sport_type')) {

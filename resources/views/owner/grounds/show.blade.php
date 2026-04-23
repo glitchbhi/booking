@@ -7,9 +7,16 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-900">{{ $ground->name }}</h1>
-            <span class="px-3 py-1 text-sm rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                {{ $ground->is_active ? 'Active' : 'Inactive' }}
-            </span>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 text-sm rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                    {{ $ground->is_active ? 'Active' : 'Inactive' }}
+                </span>
+                @if($ground->is_under_maintenance)
+                    <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
+                        <i class="fas fa-tools"></i> Under Maintenance
+                    </span>
+                @endif
+            </div>
         </div>
         
         <!-- Image Gallery -->
@@ -66,6 +73,14 @@
             <a href="{{ route('owner.grounds.availability', $ground) }}" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
                 <i class="fas fa-calendar"></i> Manage Availability
             </a>
+            @if(!$ground->is_under_maintenance)
+                <form action="{{ route('owner.grounds.toggle-maintenance', $ground) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-md">
+                        <i class="fas fa-tools"></i> Mark Under Maintenance
+                    </button>
+                </form>
+            @endif
             <a href="{{ route('owner.grounds.index') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300">
                 <i class="fas fa-arrow-left"></i> Back
             </a>

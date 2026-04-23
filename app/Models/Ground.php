@@ -14,7 +14,9 @@ class Ground extends Model
         'owner_id',
         'sport_type_id',
         'name',
+        'license_number',
         'description',
+        'owner_motivation',
         'location',
         'address',
         'phone',
@@ -23,6 +25,7 @@ class Ground extends Model
         'rate_per_hour',
         'night_rate_per_hour',
         'capacity',
+        'team_size',
         'capacity_description',
         'day_rate_start',
         'day_rate_end',
@@ -30,6 +33,10 @@ class Ground extends Model
         'night_rate_end',
         'images',
         'is_active',
+        'is_under_maintenance',
+        'maintenance_start_date',
+        'maintenance_end_date',
+        'maintenance_reason',
         'average_rating',
         'total_bookings',
         'total_reviews',
@@ -38,6 +45,9 @@ class Ground extends Model
     protected $casts = [
         'images' => 'array',
         'is_active' => 'boolean',
+        'is_under_maintenance' => 'boolean',
+        'maintenance_start_date' => 'datetime',
+        'maintenance_end_date' => 'datetime',
         'rate_per_hour' => 'decimal:2',
         'night_rate_per_hour' => 'decimal:2',
         'average_rating' => 'decimal:2',
@@ -81,6 +91,39 @@ class Ground extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeAvailable($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('is_under_maintenance', false)
+              ->orWhere(function ($subQuery) {
+                  $subQuery->whereNull('maintenance_start_date')
+                           ->orWhere('maintenance_start_date', '>', now());
+              });
+        })->where(function ($q) {
+            $q->whereNull('maintenance_end_date')
+              ->orWhere('maintenance_end_date', '<=', now())
+              ->orWhere('is_under_maintenance', false);
+        });
+    }
+
+    /**
+     * Scope to get grounds that are currently available for booking
+     * (excludes grounds under maintenance right now)
+     */
+    public function scopeCurrentlyAvailable($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('is_under_maintenance', false)
+              ->orWhere(function ($subQuery) {
+                  $subQuery->whereNull('maintenance_start_date')
+                           ->orWhere('maintenance_start_date', '>', now());
+              });
+        })->where(function ($q) {
+            $q->whereNull('maintenance_end_date')
+              ->orWhere('maintenance_end_date', '<=', now());
+        });
+    }
+
     public function scopeTrending($query, $days = 7)
     {
         return $query->withCount([
@@ -105,6 +148,64 @@ class Ground extends Model
         $this->average_rating = $this->reviews()->avg('rating') ?? 0;
         $this->total_reviews = $this->reviews()->count();
         $this->save();
+    }
+
+    /**
+     * Check if ground is currently under maintenance based on schedule
+     */
+    public function isUnderMaintenanceSchedule(): bool
+    {
+        if (!$this->maintenance_start_date || !$this->maintenance_end_date) {
+            return false;
+        }
+
+        $now = now();
+        return $now->isBetween($this->maintenance_start_date, $this->maintenance_end_date);
+    }
+
+    /**
+     * Check if maintenance period has expired
+     */
+    public function isMaintenanceExpired(): bool
+    {
+        if (!$this->maintenance_end_date) {
+            return false;
+        }
+
+        return now()->isAfter($this->maintenance_end_date);
+    }
+
+    /**
+     * Automatically end maintenance if schedule has passed
+     */
+    public function checkAndEndMaintenance(): bool
+    {
+        if ($this->isMaintenanceExpired() && $this->is_under_maintenance) {
+            $this->update([
+                'is_under_maintenance' => false,
+                'maintenance_start_date' => null,
+                'maintenance_end_date' => null,
+                'maintenance_reason' => null,
+            ]);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get remaining maintenance time
+     */
+    public function getMaintenanceRemainingTime()
+    {
+        if (!$this->maintenance_end_date) {
+            return null;
+        }
+
+        if ($this->isMaintenanceExpired()) {
+            return null;
+        }
+
+        return $this->maintenance_end_date->diffForHumans();
     }
 
     public function incrementBookingCount()

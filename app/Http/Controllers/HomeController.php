@@ -19,6 +19,7 @@ class HomeController extends Controller
         // Get popular/featured grounds for display
         $popularGrounds = Ground::with('sportType')
             ->where('is_active', true)
+            ->currentlyAvailable()
             ->orderBy('total_bookings', 'desc')
             ->get();
 
@@ -29,7 +30,8 @@ class HomeController extends Controller
     {
         // Search and filters
         $query = Ground::with(['owner', 'sportType'])
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->currentlyAvailable();
 
         // Search by name or location
         if ($request->filled('search')) {
@@ -78,12 +80,14 @@ class HomeController extends Controller
 
         // Get trending grounds (last 7 days)
         $trendingGrounds = Ground::active()
+            ->currentlyAvailable()
             ->trending(7)
             ->limit(6)
             ->get();
 
         // Get best-rated grounds
         $bestGrounds = Ground::active()
+            ->currentlyAvailable()
             ->best()
             ->limit(6)
             ->get();
@@ -97,7 +101,8 @@ class HomeController extends Controller
     public function search(Request $request)
     {
         $query = Ground::with(['owner', 'sportType'])
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->currentlyAvailable();
 
         if ($request->filled('q')) {
             $search = $request->q;

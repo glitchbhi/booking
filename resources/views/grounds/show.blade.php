@@ -127,6 +127,53 @@
                 @endif
             </div>
 
+            <!-- Maintenance Warning -->
+            @if($ground->is_under_maintenance || $ground->maintenance_start_date)
+                <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-tools text-yellow-600 text-xl"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-lg font-semibold text-yellow-800 mb-2">
+                                Maintenance Notice
+                            </h3>
+                            @if($ground->is_under_maintenance)
+                                <p class="text-yellow-700 mb-2">
+                                    <strong>This ground is currently under maintenance.</strong> Bookings are not available at this time.
+                                </p>
+                                @if($ground->maintenance_end_date)
+                                    <p class="text-yellow-600 text-sm">
+                                        Expected to be available on: {{ $ground->maintenance_end_date->format('M d, Y h:i A') }}
+                                        @if($ground->getMaintenanceRemainingTime())
+                                            ({{ $ground->getMaintenanceRemainingTime() }})
+                                        @endif
+                                    </p>
+                                @endif
+                            @else
+                                <p class="text-yellow-700 mb-2">
+                                    <strong>Scheduled Maintenance:</strong> This ground will be under maintenance from 
+                                    {{ $ground->maintenance_start_date->format('M d, Y h:i A') }}
+                                    @if($ground->maintenance_end_date)
+                                        to {{ $ground->maintenance_end_date->format('M d, Y h:i A') }}
+                                    @endif
+                                </p>
+                                <p class="text-yellow-600 text-sm">
+                                    Bookings that overlap with the maintenance period are not available.
+                                </p>
+                            @endif
+                            @if($ground->maintenance_reason)
+                                <div class="mt-3 p-3 bg-yellow-100 rounded-lg">
+                                    <p class="text-sm text-yellow-800">
+                                        <strong>Reason:</strong> {{ $ground->maintenance_reason }}
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Ground Info Card -->
             <div class="bg-white rounded-2xl shadow-lg p-6">
                 <div class="flex flex-wrap gap-2 mb-4">
@@ -166,8 +213,8 @@
                         <p class="text-sm text-gray-500">{{ $ground->total_reviews }} reviews</p>
                         @auth
                             @if(auth()->user()->hasVerifiedEmail())
-                                <a href="#reviews-section" class="inline-block mt-2 text-xs text-green-600 hover:text-green-700 font-medium">
-                                    <i class="fas fa-eye mr-1"></i> View Ratings
+                                <a href="{{ route('ground-ratings.index', $ground) }}" class="inline-block mt-2 text-xs text-green-600 hover:text-green-700 font-medium">
+                                    <i class="fas fa-eye mr-1"></i> View All Ratings
                                 </a>
                             @else
                                 <span class="inline-block mt-2 text-xs text-yellow-600">
@@ -264,7 +311,8 @@
             </div>
 
             <!-- Availability Schedule (30-minute slots with date selection) -->
-            <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6" x-data="{ selectedDate: '{{ \Carbon\Carbon::today()->format('Y-m-d') }}' }">
+            @if(!$ground->is_under_maintenance)
+                <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6" x-data="{ selectedDate: '{{ \Carbon\Carbon::today()->format('Y-m-d') }}' }">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                     <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-0 flex items-center">
                         <i class="fas fa-clock text-green-500 mr-2"></i> Availability Schedule
@@ -395,6 +443,8 @@
                 </p>
             </div>
         </div>
+            @endif
+        </div>
 
         <!-- Sidebar -->
         <div class="lg:col-span-1 space-y-6">
@@ -407,7 +457,11 @@
                 </div>
                 
                 @auth
-                    @if(auth()->user()->canBook())
+                    @if($ground->is_under_maintenance)
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-center">
+                            <i class="fas fa-tools mr-1"></i> Under Maintenance
+                        </div>
+                    @elseif(auth()->user()->canBook())
                         <a href="{{ route('bookings.create', $ground) }}" 
                            class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl font-semibold text-lg transition shadow-lg shadow-green-200">
                             <i class="fas fa-calendar-check mr-2"></i> Book Now
@@ -418,10 +472,16 @@
                         </div>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" 
-                       class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl font-semibold text-lg transition shadow-lg shadow-green-200">
-                        <i class="fas fa-sign-in-alt mr-2"></i> Login to Book
-                    </a>
+                    @if($ground->is_under_maintenance)
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-center">
+                            <i class="fas fa-tools mr-1"></i> Under Maintenance
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" 
+                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl font-semibold text-lg transition shadow-lg shadow-green-200">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login to Book
+                        </a>
+                    @endif
                 @endauth
             </div>
 
@@ -533,37 +593,22 @@
                     </a>
                 </div>
             @else
-                @if(!auth()->user()->hasVerifiedEmail())
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6 text-center">
-                        <i class="fas fa-envelope text-yellow-600 text-4xl mb-3"></i>
-                        <p class="text-yellow-800 font-medium mb-2">Email Verification Required</p>
-                        <p class="text-yellow-700 text-sm mb-4">
-                            Please verify your email address to view and submit ratings
-                        </p>
-                        <form method="POST" action="{{ route('verification.send') }}" class="inline-block">
-                            @csrf
-                            <button type="submit" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition">
-                                <i class="fas fa-paper-plane mr-2"></i> Resend Verification Email
-                            </button>
-                        </form>
-                    </div>
-                @else
-                    @php
-                        // Check if user has already reviewed this ground
-                        $existingReview = auth()->user()->reviews()
-                            ->where('ground_id', $ground->id)
-                            ->first();
-                    @endphp
+                @php
+                    // Check if user has already reviewed this ground
+                    $existingReview = auth()->user()->reviews()
+                        ->where('ground_id', $ground->id)
+                        ->first();
+                @endphp
 
-                    @if($existingReview)
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                        <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
-                            <i class="fas fa-info-circle mr-2"></i> Your Review
-                        </h3>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <div class="flex text-yellow-400 mb-2">
-                                    @for($i = 1; $i <= 5; $i++)
+                @if($existingReview)
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Your Review
+                    </h3>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="flex text-yellow-400 mb-2">
+                                @for($i = 1; $i <= 5; $i++)
                                         <i class="{{ $i <= $existingReview->rating ? 'fas' : 'far' }} fa-star"></i>
                                     @endfor
                                     <span class="ml-2 text-gray-600 text-sm">{{ $existingReview->rating }} / 5</span>
@@ -680,7 +725,6 @@
                     <i class="fas fa-comment-slash text-4xl mb-3"></i>
                     <p>No reviews yet. Be the first to review this ground!</p>
                 </div>
-            @endif
             @endif
             @endguest
         </div>

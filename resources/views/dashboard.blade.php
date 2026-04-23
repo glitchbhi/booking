@@ -68,8 +68,7 @@
                         <p class="text-green-100 text-sm mt-1">Share your experience with Thunder Booking</p>
                     </div>
                     <div class="p-6">
-                        @if(auth()->user()->hasVerifiedEmail())
-                            @if(auth()->user()->systemRating)
+                        @if(auth()->user()->systemRating)
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                     <p class="text-blue-900 font-medium text-sm">Your Rating</p>
                                     <div class="flex items-center mt-2">
@@ -102,14 +101,6 @@
                                     <i class="fas fa-star mr-2"></i> Rate Now
                                 </a>
                             @endif
-                        @else
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                <p class="text-yellow-900 text-sm">
-                                    <i class="fas fa-lock mr-2"></i>
-                                    Please verify your email address to submit ratings
-                                </p>
-                            </div>
-                        @endif
                     </div>
                 </div>
 
@@ -122,40 +113,31 @@
                         <p class="text-orange-100 text-sm mt-1">Share your experience with sports grounds</p>
                     </div>
                     <div class="p-6">
-                        @if(auth()->user()->hasVerifiedEmail())
-                            @php
-                                $userReviews = \App\Models\Review::where('user_id', auth()->id())->count();
-                                $userBookings = \App\Models\Booking::where('user_id', auth()->id())->count();
-                            @endphp
-                            <div class="mb-4">
-                                <p class="text-gray-700 font-medium">Your Ground Feedback</p>
-                                <p class="text-3xl font-bold text-gray-900 mt-1">{{ $userReviews }}</p>
-                                <p class="text-gray-500 text-sm">Reviews submitted</p>
-                            </div>
-                            @if($userBookings > 0)
-                                <div class="space-y-2">
-                                    <a href="{{ route('grounds.browse') }}" class="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition flex items-center justify-center">
-                                        <i class="fas fa-search mr-2"></i> Browse & Rate Grounds
-                                    </a>
-                                    @if($userReviews > 0)
-                                        <a href="{{ route('bookings.index') }}" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition flex items-center justify-center">
-                                            <i class="fas fa-history mr-2"></i> View My Reviews
-                                        </a>
-                                    @endif
-                                </div>
-                            @else
-                                <p class="text-gray-600 text-sm">Book a ground first to leave reviews!</p>
-                                <a href="{{ route('grounds.browse') }}" class="block mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition text-center">
-                                    <i class="fas fa-map-marker-alt mr-2"></i> Browse Grounds
+                        @php
+                            $userReviews = \App\Models\Review::where('user_id', auth()->id())->count();
+                            $userBookings = \App\Models\Booking::where('user_id', auth()->id())->count();
+                        @endphp
+                        <div class="mb-4">
+                            <p class="text-gray-700 font-medium">Your Ground Feedback</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $userReviews }}</p>
+                            <p class="text-gray-500 text-sm">Reviews submitted</p>
+                        </div>
+                        @if($userBookings > 0)
+                            <div class="space-y-2">
+                                <a href="{{ route('grounds.browse') }}" class="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition flex items-center justify-center">
+                                    <i class="fas fa-search mr-2"></i> Browse & Rate Grounds
                                 </a>
-                            @endif
-                        @else
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                <p class="text-yellow-900 text-sm">
-                                    <i class="fas fa-lock mr-2"></i>
-                                    Please verify your email address to submit reviews
-                                </p>
+                                @if($userReviews > 0)
+                                    <a href="{{ route('bookings.index') }}" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition flex items-center justify-center">
+                                        <i class="fas fa-history mr-2"></i> View My Reviews
+                                    </a>
+                                @endif
                             </div>
+                        @else
+                            <p class="text-gray-600 text-sm">Book a ground first to leave reviews!</p>
+                            <a href="{{ route('grounds.browse') }}" class="block mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition text-center">
+                                <i class="fas fa-map-marker-alt mr-2"></i> Browse Grounds
+                            </a>
                         @endif
                     </div>
                 </div>

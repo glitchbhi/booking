@@ -67,6 +67,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bookings</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Maintenance</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                 </thead>
@@ -86,6 +87,17 @@
                                 <span class="px-2 py-1 text-xs rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                     {{ $ground->is_active ? 'Active' : 'Inactive' }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($ground->is_under_maintenance)
+                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-tools"></i> Under Maintenance
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                                        Available
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <a href="{{ route('admin.grounds.show', $ground) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">

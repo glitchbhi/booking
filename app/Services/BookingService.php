@@ -38,7 +38,47 @@ class BookingService
             $conflictingBookings->where('id', '!=', $excludeBookingId);
         }
 
-        return !$conflictingBookings->exists();
+        if ($conflictingBookings->exists()) {
+            return false;
+        }
+
+        // Check for maintenance conflicts
+        return $this->isSlotAvailableDuringMaintenance($ground, $startTime, $endTime);
+    }
+
+    /**
+     * Check if time slot conflicts with maintenance schedule
+     */
+    protected function isSlotAvailableDuringMaintenance(Ground $ground, Carbon $startTime, Carbon $endTime): bool
+    {
+        // If ground is currently under maintenance, no bookings allowed
+        if ($ground->is_under_maintenance) {
+            return false;
+        }
+
+        // Check if there's a scheduled maintenance period that conflicts with the booking
+        if ($ground->maintenance_start_date && $ground->maintenance_end_date) {
+            $maintenanceStart = $ground->maintenance_start_date;
+            $maintenanceEnd = $ground->maintenance_end_date;
+
+            // Check if booking overlaps with maintenance period
+            // Booking conflicts if: booking_start < maintenance_end AND booking_end > maintenance_start
+            if ($startTime->lt($maintenanceEnd) && $endTime->gt($maintenanceStart)) {
+                return false;
+            }
+        }
+
+        // Check if there's a maintenance start date but no end date (indefinite maintenance)
+        if ($ground->maintenance_start_date && !$ground->maintenance_end_date) {
+            $maintenanceStart = $ground->maintenance_start_date;
+            
+            // If booking starts after or during maintenance, it's not available
+            if ($startTime->gte($maintenanceStart)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -53,6 +93,17 @@ class BookingService
         ?string $paymentProofPath = null
     ): Booking {
         return DB::transaction(function () use ($ground, $user, $startTime, $endTime, $bookingType, $paymentProofPath) {
+            // Check if ground is under maintenance (either flagged or has active maintenance schedule)
+            if ($ground->is_under_maintenance) {
+                throw new \Exception('This ground is currently under maintenance and cannot be booked');
+            }
+
+            // Check maintenance schedule
+            if ($ground->isUnderMaintenanceSchedule()) {
+                $remainingTime = $ground->getMaintenanceRemainingTime();
+                throw new \Exception("This ground is under maintenance until {$remainingTime} and cannot be booked");
+            }
+
             // Validate user can book
             if ($bookingType === 'online' && !$user->canBook()) {
                 throw new \Exception('Your account is suspended from booking');
@@ -79,7 +130,8 @@ class BookingService
 
             // Check slot availability (double booking prevention)
             if (!$this->isSlotAvailable($ground, $startTime, $endTime)) {
-                throw new \Exception('This time slot is already booked. Please choose a different time.');
+                $message = $this->getAvailabilityMessage($ground, $startTime, $endTime);
+                throw new \Exception($message);
             }
 
             // Calculate total amount based on day/night rates

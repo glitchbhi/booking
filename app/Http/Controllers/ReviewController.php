@@ -15,11 +15,6 @@ class ReviewController extends Controller
             return redirect()->route('login')->with('error', 'Please login to submit a review');
         }
 
-        // Check if user has verified email
-        if (!auth()->user()->hasVerifiedEmail()) {
-            return redirect()->back()->with('error', 'Please verify your email address to submit reviews and view ratings');
-        }
-
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',

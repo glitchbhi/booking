@@ -186,6 +186,9 @@ class BookingController extends Controller
 
             $isAvailable = $this->bookingService->isSlotAvailable($ground, $startDateTime, $endDateTime);
             
+            // Get specific availability message
+            $message = $this->getAvailabilityMessage($ground, $startDateTime, $endDateTime, $isAvailable);
+            
             $durationHours = $endDateTime->diffInHours($startDateTime);
             $totalAmount = $this->bookingService->calculateBookingAmount($ground, $startDateTime, $endDateTime);
             $effectiveRate = $durationHours > 0 ? $totalAmount / $durationHours : $ground->rate_per_hour;
@@ -197,7 +200,8 @@ class BookingController extends Controller
                 'day_rate' => $ground->rate_per_hour,
                 'night_rate' => $ground->night_rate_per_hour,
                 'total_amount' => $totalAmount,
-                'message' => $isAvailable ? 'Slot is available' : 'Slot is not available'
+                'message' => $message,
+                'maintenance_info' => $this->getMaintenanceInfo($ground)
             ]);
 
         } catch (\Exception $e) {
@@ -206,5 +210,56 @@ class BookingController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * Get specific availability message including maintenance information
+     */
+    protected function getAvailabilityMessage(Ground $ground, Carbon $startTime, Carbon $endTime, bool $isAvailable): string
+    {
+        if (!$isAvailable) {
+            // Check for maintenance conflicts first
+            if ($ground->is_under_maintenance) {
+                return 'This ground is currently under maintenance and not available for booking.';
+            }
+
+            if ($ground->maintenance_start_date && $ground->maintenance_end_date) {
+                $maintenanceStart = $ground->maintenance_start_date;
+                $maintenanceEnd = $ground->maintenance_end_date;
+                
+                if ($startTime->lt($maintenanceEnd) && $endTime->gt($maintenanceStart)) {
+                    return "This ground is under maintenance from {$maintenanceStart->format('M d, Y h:i A')} to {$maintenanceEnd->format('M d, Y h:i A')}. Please choose a different time.";
+                }
+            }
+
+            if ($ground->maintenance_start_date && !$ground->maintenance_end_date) {
+                $maintenanceStart = $ground->maintenance_start_date;
+                if ($startTime->gte($maintenanceStart)) {
+                    return "This ground is under maintenance starting {$maintenanceStart->format('M d, Y h:i A')} and is not available for booking.";
+                }
+            }
+
+            return 'This time slot is already booked. Please choose a different time.';
+        }
+
+        return 'Slot is available';
+    }
+
+    /**
+     * Get maintenance information for display
+     */
+    protected function getMaintenanceInfo(Ground $ground): ?array
+    {
+        if (!$ground->maintenance_start_date) {
+            return null;
+        }
+
+        return [
+            'start_date' => $ground->maintenance_start_date->format('M d, Y h:i A'),
+            'end_date' => $ground->maintenance_end_date ? $ground->maintenance_end_date->format('M d, Y h:i A') : null,
+            'reason' => $ground->maintenance_reason,
+            'is_under_maintenance' => $ground->is_under_maintenance,
+            'remaining_time' => $ground->getMaintenanceRemainingTime()
+        ];
     }
 }

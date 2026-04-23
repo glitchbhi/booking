@@ -24,6 +24,16 @@
             </div>
         @endif
         
+        <!-- Maintenance Badge -->
+        @if($ground->is_under_maintenance)
+            <div class="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+                <div class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-tools"></i>
+                    <span>Under Maintenance</span>
+                </div>
+            </div>
+        @endif
+        
         <!-- Rating Badge -->
         <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-sm font-semibold flex items-center shadow-lg z-10">
             <i class="fas fa-star text-yellow-400 mr-1"></i>

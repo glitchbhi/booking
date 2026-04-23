@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Ground;
 use App\Models\SportsType;
+use App\Models\User;
+use App\Notifications\GroundDeleted;
+use App\Notifications\GroundMaintenanceStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +28,7 @@ class GroundManagementController extends Controller
     public function create()
     {
         $sportsTypes = SportsType::active()->get();
-        return view('owner.grounds.create', compact('sportsTypes'));
+        return view('owner.grounds.create-multi-step', compact('sportsTypes'));
     }
 
     public function store(Request $request)
@@ -199,4 +202,93 @@ class GroundManagementController extends Controller
             return back()->with('error', 'Failed to update availability: ' . $e->getMessage());
         }
     }
+
+    public function toggleMaintenance(Ground $ground)
+    {
+        $this->authorize('update', $ground);
+
+        $wasUnderMaintenance = $ground->is_under_maintenance;
+        
+        $ground->update([
+            'is_under_maintenance' => !$ground->is_under_maintenance,
+            // Clear schedule if toggling off
+            'maintenance_start_date' => $ground->is_under_maintenance ? null : $ground->maintenance_start_date,
+            'maintenance_end_date' => $ground->is_under_maintenance ? null : $ground->maintenance_end_date,
+            'maintenance_reason' => $ground->is_under_maintenance ? null : $ground->maintenance_reason,
+        ]);
+
+        $status = $ground->is_under_maintenance ? 'under maintenance' : 'available';
+
+        // Get all admins and send notification
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new GroundMaintenanceStatusChanged(
+                $ground,
+                Auth::user(),
+                $ground->is_under_maintenance
+            ));
+        }
+
+        return redirect()
+            ->route('owner.grounds.show', $ground)
+            ->with('success', "Ground is now {$status}");
+    }
+
+    public function scheduleMaintenance(Request $request, Ground $ground)
+    {
+        $this->authorize('update', $ground);
+
+        $validated = $request->validate([
+            'maintenance_start_date' => 'required|date_format:Y-m-d H:i|after:now',
+            'maintenance_end_date' => 'nullable|date_format:Y-m-d H:i|after:maintenance_start_date',
+            'maintenance_reason' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $ground->update([
+                'is_under_maintenance' => true,
+                'maintenance_start_date' => $validated['maintenance_start_date'],
+                'maintenance_end_date' => $validated['maintenance_end_date'],
+                'maintenance_reason' => $validated['maintenance_reason'] ?? null,
+            ]);
+
+            // Notify admins
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new GroundMaintenanceStatusChanged(
+                    $ground,
+                    Auth::user(),
+                    true
+                ));
+            }
+
+            return redirect()
+                ->route('owner.grounds.show', $ground)
+                ->with('success', 'Maintenance scheduled successfully.' . ($ground->maintenance_end_date ? ' Ground will be automatically available on ' . $ground->maintenance_end_date->format('M d, Y h:i A') : ''));
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to schedule maintenance: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(Ground $ground)
+    {
+        $this->authorize('delete', $ground);
+
+        $owner = Auth::user();
+        $groundName = $ground->name;
+        
+        // Get all admins and send notification
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new GroundDeleted($ground, $owner));
+        }
+
+        $ground->delete();
+
+        return redirect()
+            ->route('owner.grounds.index')
+            ->with('success', 'Ground deleted successfully');
+    }
 }
+

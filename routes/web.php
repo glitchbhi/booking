@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\GroundController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\GroundRatingController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\GroundManagementController;
@@ -31,6 +32,7 @@ Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
 Route::get('/browse', [GroundController::class, 'browse'])->name('grounds.browse');
 Route::get('/grounds', [GroundController::class, 'index'])->name('grounds.index');
 Route::get('/grounds/{ground}', [GroundController::class, 'show'])->name('grounds.show');
+Route::get('/grounds/{ground}/ratings', [GroundRatingController::class, 'index'])->name('ground-ratings.index');
 
 // Redirect old home route to welcome for backward compatibility
 Route::get('/home', function () {
@@ -68,6 +70,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/reviews/{ground}', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     
+    // Ground Ratings - Dedicated ratings page
+    Route::post('/grounds/{ground}/ratings', [GroundRatingController::class, 'store'])->name('ground-ratings.store');
+    Route::delete('/grounds/{ground}/ratings/{review}', [GroundRatingController::class, 'destroy'])->name('ground-ratings.destroy');
+    
     // System Ratings - Viewing available to everyone, posting/deleting requires auth
     Route::post('/system-ratings', [SystemRatingController::class, 'store'])->name('system-ratings.store');
     Route::delete('/system-ratings/{systemRating}', [SystemRatingController::class, 'destroy'])->name('system-ratings.destroy');
@@ -96,6 +102,10 @@ Route::middleware(['auth', 'owner'])->prefix('owner')->name('owner.')->group(fun
     // Availability Management
     Route::get('/grounds/{ground}/availability', [GroundManagementController::class, 'editAvailability'])->name('grounds.availability');
     Route::put('/grounds/{ground}/availability', [GroundManagementController::class, 'updateAvailability'])->name('grounds.availability.update');
+    
+    // Maintenance Management
+    Route::post('/grounds/{ground}/toggle-maintenance', [GroundManagementController::class, 'toggleMaintenance'])->name('grounds.toggle-maintenance');
+    Route::post('/grounds/{ground}/schedule-maintenance', [GroundManagementController::class, 'scheduleMaintenance'])->name('grounds.schedule-maintenance');
     
     // Bookings
     Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
@@ -135,6 +145,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/grounds', [AdminGroundManagementController::class, 'store'])->name('grounds.store');
     Route::get('/grounds/{ground}', [AdminGroundManagementController::class, 'show'])->name('grounds.show');
     Route::post('/grounds/{ground}/toggle', [AdminGroundManagementController::class, 'toggleStatus'])->name('grounds.toggle');
+    Route::post('/grounds/{ground}/toggle-maintenance', [AdminGroundManagementController::class, 'toggleMaintenance'])->name('grounds.toggle-maintenance');
+    Route::post('/grounds/{ground}/schedule-maintenance', [AdminGroundManagementController::class, 'scheduleMaintenance'])->name('grounds.schedule-maintenance');
     
     // Booking Management
     Route::get('/bookings', [AdminBookingManagementController::class, 'index'])->name('bookings.index');

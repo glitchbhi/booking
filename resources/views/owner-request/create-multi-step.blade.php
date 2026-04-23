@@ -299,7 +299,7 @@
                         <textarea name="facilities" id="facilities" rows="3"
                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                   placeholder="e.g., Parking, Changing rooms, Washrooms, Drinking water, First aid, etc.">{{ old('facilities') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">List available facilities (optional)</p>
+                        <p class="mt-1 text-sm text-gray-500">List available facilities and amenities (optional)</p>
                         @error('facilities')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -317,7 +317,7 @@
 
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <h3 class="font-semibold text-blue-900 mb-2 flex items-center">
-                            <i class="fas fa-star mr-2"></i> Benefits of Becoming an Owner
+                            <i class="fas fa-star mr-2"></i> Benefits of Becoming a Ground Owner
                         </h3>
                         <ul class="list-disc list-inside text-blue-800 space-y-1 text-sm">
                             <li>List and manage your sports grounds</li>
@@ -382,6 +382,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('price_day').addEventListener('input', updatePricingPreview);
     document.getElementById('night_time_start').addEventListener('change', updatePricingPreview);
     document.getElementById('price_night').addEventListener('input', updatePricingPreview);
+    
+    // Add event listeners for auto-fill functionality
+    document.getElementById('day_time_start').addEventListener('change', autoFillOpeningTime);
+    document.getElementById('night_time_start').addEventListener('change', autoFillClosingTime);
+    document.getElementById('available_at_night').addEventListener('change', autoFillClosingTime);
+    
+    // Initial auto-fill
+    autoFillOpeningTime();
+    autoFillClosingTime();
     
     updatePricingPreview();
 });
@@ -569,6 +578,9 @@ function toggleNightPrice() {
         priceNight.value = '';
         nightTimeStart.value = '18:00';
     }
+    
+    // Auto-fill closing time when night price status changes
+    autoFillClosingTime();
     updatePricingPreview();
 }
 
@@ -662,6 +674,30 @@ function previewImages(event) {
         };
         reader.readAsDataURL(file);
     });
+}
+
+function autoFillOpeningTime() {
+    const dayTimeStart = document.getElementById('day_time_start').value;
+    const openingTime = document.getElementById('opening_time');
+    
+    if (dayTimeStart && openingTime) {
+        openingTime.value = dayTimeStart;
+    }
+}
+
+function autoFillClosingTime() {
+    const hasNightPrice = document.getElementById('available_at_night').checked;
+    const nightTimeStart = document.getElementById('night_time_start').value;
+    const closingTime = document.getElementById('closing_time');
+    
+    if (!closingTime) return;
+    
+    if (hasNightPrice && nightTimeStart) {
+        closingTime.value = nightTimeStart;
+    } else {
+        // If no night time, use a default closing time
+        closingTime.value = '22:00';
+    }
 }
 </script>
 @endsection

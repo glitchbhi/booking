@@ -274,7 +274,8 @@
                         Active (visible to users for booking)
                     </label>
                 </div>
-            </div>
+
+                            </div>
 
             <div class="mt-6 flex space-x-4">
                 <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 font-semibold">
@@ -287,6 +288,122 @@
             </div>
         </form>
 
+        <!-- Maintenance Schedule Section -->
+        <div class="mt-6 border-t pt-6">
+            <h3 class="text-lg font-semibold mb-4">Schedule Maintenance</h3>
+            
+            @if($ground->is_under_maintenance && $ground->maintenance_start_date)
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+                    <p class="text-sm text-blue-800 mb-2">
+                        <i class="fas fa-info-circle"></i> Current maintenance schedule:
+                    </p>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li><strong>Start:</strong> {{ $ground->maintenance_start_date->format('M d, Y h:i A') }}</li>
+                        <li><strong>End:</strong> {{ $ground->maintenance_end_date->format('M d, Y h:i A') }}</li>
+                        @if($ground->maintenance_reason)
+                            <li><strong>Reason:</strong> {{ $ground->maintenance_reason }}</li>
+                        @endif
+                        @if(!$ground->isMaintenanceExpired())
+                            <li><strong>Remaining Time:</strong> {{ $ground->getMaintenanceRemainingTime() }}</li>
+                        @endif
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('owner.grounds.schedule-maintenance', $ground) }}" method="POST" class="space-y-4">
+                @csrf
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Maintenance Schedule <span class="text-red-500">*</span>
+                    </label>
+                    <div class="bg-white border border-gray-300 rounded-md p-4" x-data="maintenanceDatePicker()">
+                        <div class="space-y-4">
+                            <!-- Start Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-2">
+                                    <i class="fas fa-calendar-check text-blue-600"></i> Start Date & Time
+                                </label>
+                                <input type="datetime-local" 
+                                       id="maintenance_start_date"
+                                       name="maintenance_start_date" 
+                                       x-model="startDate"
+                                       @change="validateDates()"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                       :min="minDateTime"
+                                       required>
+                                @error('maintenance_start_date')
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- End Date (Optional) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-2">
+                                    <i class="fas fa-calendar-times text-orange-600"></i> End Date & Time (Optional)
+                                </label>
+                                <input type="datetime-local" 
+                                       id="maintenance_end_date"
+                                       name="maintenance_end_date" 
+                                       x-model="endDate"
+                                       @change="validateDates()"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                       :min="startDate || minDateTime">
+                                <p class="text-xs text-gray-500 mt-1">Leave empty if maintenance duration is unknown</p>
+                                @error('maintenance_end_date')
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Duration Display -->
+                            <div x-show="startDate && endDate" class="bg-blue-50 border border-blue-200 rounded-md p-3">
+                                <p class="text-sm text-gray-700">
+                                    <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
+                                    <strong>Duration:</strong> <span x-text="getDuration()"></span>
+                                </p>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div x-show="dateError" class="bg-red-50 border border-red-200 rounded-md p-3">
+                                <p class="text-sm text-red-700" x-text="dateError"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="maintenance_reason" class="block text-sm font-medium text-gray-700 mb-1">
+                        Maintenance Reason (optional)
+                    </label>
+                    <textarea id="maintenance_reason" name="maintenance_reason" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="e.g., Facility repairs, equipment maintenance, etc.">{{ old('maintenance_reason', $ground->maintenance_reason) }}</textarea>
+                    @error('maintenance_reason')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="flex space-x-2">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-semibold">
+                        <i class="fas fa-calendar-check"></i> Schedule Maintenance
+                    </button>
+                    @if($ground->is_under_maintenance)
+                        <form action="{{ route('owner.grounds.toggle-maintenance', $ground) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold">
+                                <i class="fas fa-play"></i> Available Now
+                            </button>
+                        </form>
+                    @endif
+                    @if($ground->is_under_maintenance && $ground->maintenance_start_date)
+                        <button type="button" onclick="clearSchedule()" class="bg-gray-400 text-white px-6 py-2 rounded-md hover:bg-gray-500 font-semibold">
+                            <i class="fas fa-times"></i> Clear Schedule
+                        </button>
+                    @endif
+                </div>
+            </form>
+        </div>
+
         <div class="mt-6 border-t pt-6">
             <form action="{{ route('owner.grounds.destroy', $ground) }}" method="POST" 
                   onsubmit="return confirm('Are you sure you want to delete this ground? This action cannot be undone.')">
@@ -297,6 +414,72 @@
                 </button>
             </form>
         </div>
+
+        <script>
+            function clearSchedule() {
+                // Clear the schedule by submitting empty values
+                if (confirm('Are you sure you want to clear the maintenance schedule? This will mark the ground as available immediately.')) {
+                    document.getElementById('maintenance_start_date').value = '';
+                    document.getElementById('maintenance_end_date').value = '';
+                    // Toggle maintenance off to remove the schedule
+                    window.location.href = '{{ route("owner.grounds.toggle-maintenance", $ground) }}';
+                }
+            }
+
+            function maintenanceDatePicker() {
+                return {
+                    startDate: '{{ old('maintenance_start_date', $ground->maintenance_start_date?->format('Y-m-d\TH:i')) }}',
+                    endDate: '{{ old('maintenance_end_date', $ground->maintenance_end_date?->format('Y-m-d\TH:i')) }}',
+                    dateError: '',
+                    
+                    get minDateTime() {
+                        const now = new Date();
+                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                        return now.toISOString().slice(0, 16);
+                    },
+                    
+                    validateDates() {
+                        this.dateError = '';
+                        
+                        if (!this.startDate) {
+                            this.dateError = 'Start date is required';
+                            return;
+                        }
+                        
+                        if (this.startDate < this.minDateTime) {
+                            this.dateError = 'Start date cannot be in the past';
+                            this.startDate = '';
+                            return;
+                        }
+                        
+                        if (this.endDate && this.endDate <= this.startDate) {
+                            this.dateError = 'End date must be after start date';
+                            this.endDate = '';
+                            return;
+                        }
+                    },
+                    
+                    getDuration() {
+                        if (!this.startDate || !this.endDate) return '';
+                        
+                        const start = new Date(this.startDate);
+                        const end = new Date(this.endDate);
+                        const diff = Math.abs(end - start);
+                        
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        let duration = '';
+                        if (days > 0) duration += `${days} day${days > 1 ? 's' : ''} `;
+                        if (hours > 0) duration += `${hours} hour${hours > 1 ? 's' : ''} `;
+                        if (minutes > 0) duration += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+                        
+                        return duration.trim();
+                    }
+                }
+            }
+        </script>
     </div>
 </div>
 

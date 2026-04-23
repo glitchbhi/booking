@@ -20,6 +20,9 @@ class Kernel extends ConsoleKernel
 
         // Remove expired suspensions every hour
         $schedule->command('users:remove-suspensions')->hourly();
+
+        // End expired maintenance schedules every 5 minutes
+        $schedule->command('maintenance:end-expired')->everyFiveMinutes();
     }
 
     /**

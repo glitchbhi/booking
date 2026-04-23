@@ -58,10 +58,15 @@
                                 <span class="text-2xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 2) }}</span>
                                 <span class="text-sm text-gray-600">/hour</span>
                             </div>
-                            <div>
+                            <div class="flex gap-2">
                                 <span class="px-3 py-1 text-xs rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                     {{ $ground->is_active ? 'Active' : 'Inactive' }}
                                 </span>
+                                @if($ground->is_under_maintenance)
+                                    <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-tools"></i> Maintenance
+                                    </span>
+                                @endif
                             </div>
                         </div>
                         

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ground;
 use App\Models\SportsType;
 use App\Models\User;
+use App\Notifications\GroundMaintenanceStatusChanged;
 use Illuminate\Http\Request;
 
 class GroundManagementController extends Controller
@@ -121,5 +122,94 @@ class GroundManagementController extends Controller
         return redirect()
             ->route('admin.grounds.show', $ground)
             ->with('success', 'Ground created successfully!');
+    }
+
+    public function toggleMaintenance(Ground $ground)
+    {
+        $ground->update([
+            'is_under_maintenance' => !$ground->is_under_maintenance,
+        ]);
+
+        $status = $ground->is_under_maintenance ? 'under maintenance' : 'available';
+
+        // Notify owner about the maintenance status change
+        $owner = $ground->owner;
+        $admin = auth()->user();
+        $owner->notify(new GroundMaintenanceStatusChanged(
+            $ground,
+            $admin,
+            $ground->is_under_maintenance
+        ));
+
+        return redirect()
+            ->route('admin.grounds.show', $ground)
+            ->with('success', "Ground is now {$status}");
+    }
+
+    public function scheduleMaintenance(Request $request, Ground $ground)
+    {
+        $validated = $request->validate([
+            'maintenance_action' => 'required|in:start,end',
+            'maintenance_start_date' => 'required_if:maintenance_action,start|date|after_or_equal:now',
+            'maintenance_end_date' => 'nullable|date|after:maintenance_start_date',
+            'maintenance_reason' => 'nullable|string|max:500',
+        ]);
+
+        $action = $validated['maintenance_action'];
+
+        if ($action === 'end') {
+            // End maintenance immediately
+            $ground->update([
+                'is_under_maintenance' => false,
+                'maintenance_start_date' => null,
+                'maintenance_end_date' => null,
+                'maintenance_reason' => null,
+            ]);
+
+            $message = 'Ground is now available for bookings';
+            $notifyOwner = true;
+            $isMaintenance = false;
+        } else {
+            // Start or schedule maintenance
+            $updateData = [
+                'is_under_maintenance' => true,
+                'maintenance_start_date' => $validated['maintenance_start_date'],
+                'maintenance_reason' => $validated['maintenance_reason'] ?? null,
+            ];
+
+            if (!empty($validated['maintenance_end_date'])) {
+                $updateData['maintenance_end_date'] = $validated['maintenance_end_date'];
+            } else {
+                $updateData['maintenance_end_date'] = null;
+            }
+
+            $ground->update($updateData);
+
+            $startDate = \Carbon\Carbon::parse($validated['maintenance_start_date']);
+            
+            if ($startDate->isPast()) {
+                $message = 'Ground is now under maintenance';
+            } else {
+                $message = "Ground maintenance scheduled for {$startDate->format('M d, Y h:i A')}";
+            }
+
+            $notifyOwner = true;
+            $isMaintenance = true;
+        }
+
+        // Notify owner about the maintenance status change
+        if ($notifyOwner) {
+            $owner = $ground->owner;
+            $admin = auth()->user();
+            $owner->notify(new GroundMaintenanceStatusChanged(
+                $ground,
+                $admin,
+                $isMaintenance
+            ));
+        }
+
+        return redirect()
+            ->route('admin.grounds.show', $ground)
+            ->with('success', $message);
     }
 }
