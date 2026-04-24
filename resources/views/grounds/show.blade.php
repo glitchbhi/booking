@@ -11,23 +11,24 @@
     $hasImages = count($groundImages) > 0;
 @endphp
 
-<div class="max-w-full 2xl:max-w-[1920px] 3xl:max-w-[2560px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6">
-    <!-- Breadcrumb -->
-    <nav class="mb-6">
-        <ol class="flex items-center space-x-2 text-sm">
-            <li><a href="{{ route('welcome') }}" class="text-gray-500 hover:text-green-600"><i class="fas fa-home"></i></a></li>
-            <li class="text-gray-400">/</li>
-            <li><a href="{{ route('grounds.browse') }}" class="text-gray-500 hover:text-green-600">Grounds</a></li>
-            <li class="text-gray-400">/</li>
-            <li class="text-green-600 font-medium">{{ $ground->name }}</li>
-        </ol>
-    </nav>
+<div class="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 sm:py-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Breadcrumb -->
+        <nav class="mb-4 sm:mb-6">
+            <ol class="flex items-center space-x-2 text-xs sm:text-sm overflow-x-auto pb-1">
+                <li><a href="{{ route('welcome') }}" class="text-gray-500 hover:text-green-600 flex-shrink-0"><i class="fas fa-home"></i></a></li>
+                <li class="text-gray-400 flex-shrink-0">/</li>
+                <li><a href="{{ route('grounds.browse') }}" class="text-gray-500 hover:text-green-600 flex-shrink-0">Grounds</a></li>
+                <li class="text-gray-400 flex-shrink-0">/</li>
+                <li class="text-green-600 font-medium flex-shrink-0 truncate">{{ $ground->name }}</li>
+            </ol>
+        </nav>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         <!-- Main Content -->
-        <div class="xl:col-span-2 space-y-6">
+        <div class="xl:col-span-2 space-y-4 sm:space-y-6">
             <!-- Image Gallery / Carousel -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg overflow-hidden">
                 @if($hasMultipleImages)
                     <!-- Full Gallery Carousel for Multiple Images -->
                     <div x-data="{ 
@@ -38,7 +39,7 @@
                         prevSlide() { this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides; }
                     }" class="relative">
                         <!-- Main Image -->
-                        <div class="relative h-80 md:h-96 overflow-hidden">
+                        <div class="relative h-48 sm:h-80 md:h-96 lg:h-[400px] xl:h-[450px] overflow-hidden">
                             @foreach($groundImages as $index => $image)
                                 <div 
                                     x-show="currentSlide === {{ $index }}"
@@ -60,26 +61,26 @@
                             @endforeach
                             
                             <!-- Navigation Arrows -->
-                            <button @click="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition">
+                            <button @click="prevSlide()" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg transition text-sm sm:text-base">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <button @click="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition">
+                            <button @click="nextSlide()" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg transition text-sm sm:text-base">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                             
                             <!-- Counter -->
-                            <div class="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                            <div class="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 bg-black/60 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
                                 <span x-text="(currentSlide + 1)"></span> / {{ count($groundImages) }}
                             </div>
                         </div>
                         
                         <!-- Thumbnail Strip -->
-                        <div class="flex gap-2 p-4 bg-gray-50 overflow-x-auto">
+                        <div class="flex gap-1 sm:gap-2 p-3 sm:p-4 bg-gray-50 overflow-x-auto">
                             @foreach($groundImages as $index => $image)
                                 <button 
                                     @click="currentSlide = {{ $index }}"
                                     :class="currentSlide === {{ $index }} ? 'ring-2 ring-green-500 ring-offset-2' : 'opacity-60 hover:opacity-100'"
-                                    class="flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden transition"
+                                    class="flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden transition"
                                 >
                                     <img src="{{ asset('storage/' . $image) }}" alt="Thumbnail {{ $index + 1 }}" class="w-full h-full object-cover">
                                 </button>
@@ -116,34 +117,34 @@
                         </div>
                     </div>
                 @elseif(count($groundImages) === 1)
-                    <div class="h-80 md:h-96">
+                    <div class="h-48 sm:h-80 md:h-96 lg:h-[400px]">
                         <img src="{{ asset('storage/' . $groundImages[0]) }}" alt="{{ $ground->name }}" class="w-full h-full object-cover">
                     </div>
                 @else
-                    <div class="h-80 md:h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
-                        <i class="fas fa-image text-gray-400 text-6xl mb-4"></i>
-                        <span class="text-gray-500 text-xl font-medium">No images available</span>
+                    <div class="h-48 sm:h-80 md:h-96 lg:h-[400px] bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                        <i class="fas fa-image text-gray-400 text-4xl sm:text-6xl mb-4"></i>
+                        <span class="text-gray-500 text-base sm:text-xl font-medium">No images available</span>
                     </div>
                 @endif
             </div>
 
             <!-- Maintenance Warning -->
             @if($ground->is_under_maintenance || $ground->maintenance_start_date)
-                <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6">
-                    <div class="flex items-start">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6">
+                    <div class="flex gap-3">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-tools text-yellow-600 text-xl"></i>
+                            <i class="fas fa-tools text-yellow-600 text-lg sm:text-xl"></i>
                         </div>
-                        <div class="ml-3 flex-1">
-                            <h3 class="text-lg font-semibold text-yellow-800 mb-2">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-semibold text-yellow-800 mb-1 sm:mb-2">
                                 Maintenance Notice
                             </h3>
                             @if($ground->is_under_maintenance)
-                                <p class="text-yellow-700 mb-2">
+                                <p class="text-yellow-700 mb-1 sm:mb-2 text-sm sm:text-base">
                                     <strong>This ground is currently under maintenance.</strong> Bookings are not available at this time.
                                 </p>
                                 @if($ground->maintenance_end_date)
-                                    <p class="text-yellow-600 text-sm">
+                                    <p class="text-yellow-600 text-xs sm:text-sm">
                                         Expected to be available on: {{ $ground->maintenance_end_date->format('M d, Y h:i A') }}
                                         @if($ground->getMaintenanceRemainingTime())
                                             ({{ $ground->getMaintenanceRemainingTime() }})
@@ -151,20 +152,20 @@
                                     </p>
                                 @endif
                             @else
-                                <p class="text-yellow-700 mb-2">
+                                <p class="text-yellow-700 mb-1 sm:mb-2 text-sm sm:text-base">
                                     <strong>Scheduled Maintenance:</strong> This ground will be under maintenance from 
                                     {{ $ground->maintenance_start_date->format('M d, Y h:i A') }}
                                     @if($ground->maintenance_end_date)
                                         to {{ $ground->maintenance_end_date->format('M d, Y h:i A') }}
                                     @endif
                                 </p>
-                                <p class="text-yellow-600 text-sm">
+                                <p class="text-yellow-600 text-xs sm:text-sm">
                                     Bookings that overlap with the maintenance period are not available.
                                 </p>
                             @endif
                             @if($ground->maintenance_reason)
-                                <div class="mt-3 p-3 bg-yellow-100 rounded-lg">
-                                    <p class="text-sm text-yellow-800">
+                                <div class="mt-2 sm:mt-3 p-2 sm:p-3 bg-yellow-100 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-yellow-800">
                                         <strong>Reason:</strong> {{ $ground->maintenance_reason }}
                                     </p>
                                 </div>
@@ -175,135 +176,137 @@
             @endif
 
             <!-- Ground Info Card -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
-                        <i class="fas fa-running mr-1.5"></i> {{ $ground->sportType->name }}
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6">
+                <div class="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
+                    <span class="inline-flex items-center px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                        <i class="fas fa-running mr-0.5 sm:mr-1 md:mr-1.5 text-xs"></i> {{ $ground->sportType->name }}
                     </span>
                     @if($ground->capacity)
-                        <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
-                            <i class="fas fa-users mr-1.5"></i> {{ $ground->capacity }}
+                        <span class="inline-flex items-center px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                            <i class="fas fa-users mr-0.5 sm:mr-1 md:mr-1.5 text-xs"></i> {{ $ground->capacity }}
                         </span>
                     @endif
                     @if($ground->night_rate_per_hour)
-                        <span class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
-                            <i class="fas fa-moon mr-1.5"></i> Night Booking Available
+                        <span class="inline-flex items-center px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+                            <i class="fas fa-moon mr-0.5 sm:mr-1 md:mr-1.5 text-xs"></i> 
+                            <span class="hidden sm:inline">Night Booking Available</span>
+                            <span class="sm:hidden">Night</span>
                         </span>
                     @endif
                 </div>
 
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ $ground->name }}</h1>
+                <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">{{ $ground->name }}</h1>
                 
-                <div class="flex items-center text-gray-600 mb-4">
-                    <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>
+                <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4">
+                    <i class="fas fa-map-marker-alt text-green-500"></i>
                     <span>{{ $ground->location }}</span>
                     @if($ground->address)
-                        <span class="mx-2">•</span>
-                        <span>{{ $ground->address }}</span>
+                        <span class="hidden sm:inline text-gray-400">•</span>
+                        <span class="w-full sm:w-auto">{{ $ground->address }}</span>
                     @endif
                 </div>
 
                 <!-- Stats Row -->
-                <div class="grid grid-cols-3 gap-4 py-4 border-y border-gray-100">
+                <div class="grid grid-cols-3 gap-1 sm:gap-2 md:gap-4 py-3 sm:py-4 border-y border-gray-100">
                     <div class="text-center">
                         <div class="flex items-center justify-center text-yellow-400 mb-1">
-                            <i class="fas fa-star text-xl"></i>
-                            <span class="ml-1 text-2xl font-bold text-gray-900">{{ number_format($ground->average_rating, 1) }}</span>
+                            <i class="fas fa-star text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                            <span class="ml-1 text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-gray-900">{{ number_format($ground->average_rating, 1) }}</span>
                         </div>
-                        <p class="text-sm text-gray-500">{{ $ground->total_reviews }} reviews</p>
+                        <p class="text-xs sm:text-sm text-gray-500">{{ $ground->total_reviews }} reviews</p>
                         @auth
                             @if(auth()->user()->hasVerifiedEmail())
-                                <a href="{{ route('ground-ratings.index', $ground) }}" class="inline-block mt-2 text-xs text-green-600 hover:text-green-700 font-medium">
-                                    <i class="fas fa-eye mr-1"></i> View All Ratings
+                                <a href="{{ route('ground-ratings.index', $ground) }}" class="inline-block mt-1 sm:mt-2 text-xs text-green-600 hover:text-green-700 font-medium">
+                                    <i class="fas fa-eye mr-1"></i> View All
                                 </a>
                             @else
-                                <span class="inline-block mt-2 text-xs text-yellow-600">
-                                    <i class="fas fa-lock mr-1"></i> Verify email to view
+                                <span class="inline-block mt-1 sm:mt-2 text-xs text-yellow-600">
+                                    <i class="fas fa-lock mr-1"></i> Verify
                                 </span>
                             @endif
                         @else
-                            <a href="{{ route('login') }}" class="inline-block mt-2 text-xs text-gray-600 hover:text-gray-700 font-medium">
-                                <i class="fas fa-sign-in-alt mr-1"></i> Login to view
+                            <a href="{{ route('login') }}" class="inline-block mt-1 sm:mt-2 text-xs text-gray-600 hover:text-gray-700 font-medium">
+                                <i class="fas fa-sign-in-alt mr-1"></i> Login
                             </a>
                         @endauth
                     </div>
                     <div class="text-center border-x border-gray-100">
-                        <div class="text-2xl font-bold text-gray-900 mb-1">{{ $ground->total_bookings }}</div>
-                        <p class="text-sm text-gray-500">Bookings</p>
+                        <div class="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-gray-900 mb-1">{{ $ground->total_bookings }}</div>
+                        <p class="text-xs sm:text-sm text-gray-500">Bookings</p>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-green-600 mb-1">Active</div>
-                        <p class="text-sm text-gray-500">Status</p>
+                        <div class="text-sm sm:text-base md:text-lg lg:text-2xl font-bold text-green-600 mb-1">Active</div>
+                        <p class="text-xs sm:text-sm text-gray-500">Status</p>
                     </div>
                 </div>
 
                 @if($ground->description)
-                    <div class="mt-6">
-                        <h2 class="text-lg font-bold text-gray-900 mb-2">About this Ground</h2>
-                        <p class="text-gray-600 leading-relaxed">{{ $ground->description }}</p>
+                    <div class="mt-3 sm:mt-4 md:mt-6">
+                        <h2 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-2">About this Ground</h2>
+                        <p class="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed">{{ $ground->description }}</p>
                     </div>
                 @endif
 
                 @if($ground->capacity_description)
-                    <div class="mt-4 p-4 bg-blue-50 rounded-xl">
-                        <h3 class="font-semibold text-blue-900 mb-1"><i class="fas fa-info-circle mr-1"></i> Capacity Info</h3>
-                        <p class="text-blue-700 text-sm">{{ $ground->capacity_description }}</p>
+                    <div class="mt-2 sm:mt-3 md:mt-4 p-2 sm:p-3 md:p-4 bg-blue-50 rounded-lg sm:rounded-xl">
+                        <h3 class="font-semibold text-blue-900 mb-1 text-xs sm:text-sm md:text-base"><i class="fas fa-info-circle mr-1 text-xs sm:text-sm"></i> Capacity Info</h3>
+                        <p class="text-blue-700 text-xs sm:text-sm">{{ $ground->capacity_description }}</p>
                     </div>
                 @endif
             </div>
 
             <!-- Pricing Card -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-tag text-green-500 mr-2"></i> Pricing
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6">
+                <h2 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                    <i class="fas fa-tag text-green-500 mr-2 text-sm sm:text-base"></i> Pricing
                 </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-2 gap-4 2xl:gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
                     <!-- Day Rate -->
-                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-                        <div class="flex items-center mb-2">
-                            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-sun text-white"></i>
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border border-yellow-200">
+                        <div class="flex items-center mb-2 sm:mb-3">
+                            <div class="w-6 sm:w-8 md:w-10 h-6 sm:h-8 md:h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                                <i class="fas fa-sun text-white text-xs sm:text-sm md:text-base"></i>
                             </div>
-                            <div>
-                                <h3 class="font-semibold text-gray-900">Day Rate</h3>
-                                <p class="text-xs text-gray-500">
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-gray-900 text-xs sm:text-sm md:text-base">Day Rate</h3>
+                                <p class="text-xs text-gray-500 whitespace-nowrap">
                                     {{ $ground->day_rate_start ? \Carbon\Carbon::parse($ground->day_rate_start)->format('g:i A') : '6:00 AM' }} - 
                                     {{ $ground->day_rate_end ? \Carbon\Carbon::parse($ground->day_rate_end)->format('g:i A') : '6:00 PM' }}
                                 </p>
                             </div>
                         </div>
-                        <div class="text-2xl font-bold text-gray-900">
+                        <div class="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-gray-900">
                             BTN {{ number_format($ground->rate_per_hour, 0) }}
-                            <span class="text-sm font-normal text-gray-500">/ hour</span>
+                            <span class="text-xs sm:text-sm font-normal text-gray-500">/ hour</span>
                         </div>
                     </div>
                     
                     <!-- Night Rate -->
                     @if($ground->night_rate_per_hour)
-                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-200">
-                            <div class="flex items-center mb-2">
-                                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mr-3">
-                                    <i class="fas fa-moon text-white"></i>
+                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border border-indigo-200">
+                            <div class="flex items-center mb-2 sm:mb-3">
+                                <div class="w-6 sm:w-8 md:w-10 h-6 sm:h-8 md:h-10 bg-indigo-500 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                                    <i class="fas fa-moon text-white text-xs sm:text-sm md:text-base"></i>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-gray-900">Night Rate</h3>
-                                    <p class="text-xs text-gray-500">
+                                <div class="min-w-0">
+                                    <h3 class="font-semibold text-gray-900 text-xs sm:text-sm md:text-base">Night Rate</h3>
+                                    <p class="text-xs text-gray-500 whitespace-nowrap">
                                         {{ $ground->night_rate_start ? \Carbon\Carbon::parse($ground->night_rate_start)->format('g:i A') : '6:00 PM' }} - 
                                         {{ $ground->night_rate_end ? \Carbon\Carbon::parse($ground->night_rate_end)->format('g:i A') : '10:00 PM' }}
                                     </p>
                                 </div>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900">
+                            <div class="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-gray-900">
                                 BTN {{ number_format($ground->night_rate_per_hour, 0) }}
-                                <span class="text-sm font-normal text-gray-500">/ hour</span>
+                                <span class="text-xs sm:text-sm font-normal text-gray-500">/ hour</span>
                             </div>
                         </div>
                     @else
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 flex items-center justify-center">
+                        <div class="bg-gray-50 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border border-gray-200 flex items-center justify-center">
                             <div class="text-center text-gray-400">
-                                <i class="fas fa-moon text-3xl mb-2"></i>
-                                <p class="text-sm">Night booking not available</p>
+                                <i class="fas fa-moon text-lg sm:text-2xl md:text-3xl mb-2"></i>
+                                <p class="text-xs sm:text-sm">Night booking not available</p>
                             </div>
                         </div>
                     @endif
@@ -312,19 +315,19 @@
 
             <!-- Availability Schedule (30-minute slots with date selection) -->
             @if(!$ground->is_under_maintenance)
-                <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6" x-data="{ selectedDate: '{{ \Carbon\Carbon::today()->format('Y-m-d') }}' }">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                    <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-0 flex items-center">
-                        <i class="fas fa-clock text-green-500 mr-2"></i> Availability Schedule
+                <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6" x-data="{ selectedDate: '{{ \Carbon\Carbon::today()->format('Y-m-d') }}' }">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4">
+                    <h2 class="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-900 flex items-center flex-shrink-0">
+                        <i class="fas fa-clock text-green-500 mr-1 sm:mr-2 text-xs sm:text-sm"></i> Availability
                     </h2>
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm text-gray-600 font-medium">Select Date:</label>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <label class="text-xs sm:text-sm text-gray-600 font-medium flex-shrink-0">Select Date:</label>
                         <input 
                             type="date" 
                             x-model="selectedDate"
                             min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
                             max="{{ \Carbon\Carbon::today()->addDays(30)->format('Y-m-d') }}"
-                            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                            class="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-xs sm:text-sm w-full sm:w-auto"
                         >
                     </div>
                 </div>
@@ -347,7 +350,7 @@
                         });
                 @endphp
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-1 sm:gap-2">
                     @for($day = 0; $day < 30; $day++)
                         @php
                             $checkDate = $today->copy()->addDays($day);
@@ -357,7 +360,7 @@
                         
                         <template x-if="selectedDate === '{{ $dateKey }}'">
                             <div class="col-span-full">
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-0.5 sm:gap-1 md:gap-2">
                                     @for($hour = $startHour; $hour < $endHour; $hour++)
                                         @foreach([0, 30] as $minute)
                                             @php
@@ -383,29 +386,29 @@
                                             
                                             <div class="relative group">
                                                 <div class="
-                                                    px-2 py-2 sm:px-3 sm:py-3 rounded-lg text-center border-2 transition-all
+                                                    px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 lg:px-3 lg:py-3 rounded text-center border-2 transition-all
                                                     {{ $isBooked ? 'bg-red-50 border-red-400 shadow-sm' : 'bg-green-50 border-green-400 hover:border-green-500 hover:shadow-md' }}
                                                 ">
-                                                    <div class="text-xs sm:text-sm font-bold {{ $isBooked ? 'text-red-700' : 'text-green-700' }}">
+                                                    <div class="text-xs sm:text-xs md:text-sm font-bold {{ $isBooked ? 'text-red-700' : 'text-green-700' }}">
                                                         {{ $slotStart->format('g:i A') }}
                                                     </div>
-                                                    <div class="text-xs mt-1 font-semibold {{ $isBooked ? 'text-red-600' : 'text-green-600' }}">
+                                                    <div class="text-xs mt-0.5 md:mt-1 font-semibold {{ $isBooked ? 'text-red-600' : 'text-green-600' }}">
                                                         @if($isBooked)
-                                                            <i class="fas fa-times-circle"></i> Booked
+                                                            <i class="fas fa-times-circle hidden sm:inline"></i> <span class="sm:hidden">❌</span><span class="hidden sm:inline">Booked</span>
                                                         @else
-                                                            <i class="fas fa-check-circle"></i> Free
+                                                            <i class="fas fa-check-circle hidden sm:inline"></i> <span class="sm:hidden">✅</span><span class="hidden sm:inline">Free</span>
                                                         @endif
                                                     </div>
                                                     @if($isBooked && $bookedBy)
-                                                        <div class="text-xs mt-1 text-red-500 truncate">
+                                                        <div class="text-xs mt-0.5 md:mt-1 text-red-500 truncate hidden md:block">
                                                             {{ $bookedBy }}
                                                         </div>
                                                     @endif
                                                 </div>
                                                 
                                                 <!-- Tooltip -->
-                                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10 whitespace-nowrap">
-                                                    <div class="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+                                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 whitespace-nowrap">
+                                                    <div class="bg-gray-900 text-white text-xs rounded px-2 py-1 sm:px-3 sm:py-2 shadow-lg">
                                                         {{ $slotStart->format('g:i A') }} - {{ $slotEnd->format('g:i A') }}
                                                         <div class="text-xs font-semibold {{ $isBooked ? 'text-red-400' : 'text-green-400' }}">
                                                             {{ $isBooked ? '❌ Booked' : '✅ Available' }}
@@ -427,19 +430,19 @@
                     @endfor
                 </div>
                 
-                <div class="flex flex-wrap gap-3 sm:gap-4 mt-4 pt-4 border-t border-gray-100 text-xs sm:text-sm">
+                <div class="flex flex-wrap gap-2 sm:gap-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 text-xs sm:text-sm">
                     <div class="flex items-center">
-                        <div class="w-4 h-4 bg-green-50 border-2 border-green-400 rounded mr-2"></div>
-                        <span class="text-gray-600"><i class="fas fa-check-circle text-green-600 mr-1"></i>Available</span>
+                        <div class="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-green-50 border-2 border-green-400 rounded mr-1 sm:mr-2"></div>
+                        <span class="text-gray-600"><i class="fas fa-check-circle text-green-600 mr-1 hidden sm:inline"></i><span class="sm:hidden">✅</span>Available</span>
                     </div>
                     <div class="flex items-center">
-                        <div class="w-4 h-4 bg-red-50 border-2 border-red-400 rounded mr-2"></div>
-                        <span class="text-gray-600"><i class="fas fa-times-circle text-red-600 mr-1"></i>Booked</span>
+                        <div class="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-red-50 border-2 border-red-400 rounded mr-1 sm:mr-2"></div>
+                        <span class="text-gray-600"><i class="fas fa-times-circle text-red-600 mr-1 hidden sm:inline"></i><span class="sm:hidden">❌</span>Booked</span>
                     </div>
                 </div>
                 
-                <p class="text-xs text-gray-500 mt-3">
-                    <i class="fas fa-info-circle"></i> Slots are shown in 30-minute intervals. Select a date above to view availability.
+                <p class="text-xs text-gray-500 mt-2 sm:mt-3">
+                    <i class="fas fa-info-circle"></i> 30-minute slots. Select a date to view availability.
                 </p>
             </div>
         </div>
@@ -447,38 +450,38 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
+        <div class="xl:col-span-1 space-y-4 sm:space-y-6">
             <!-- Book Now Card -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <div class="text-center mb-4">
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 sticky top-4">
+                <div class="text-center mb-3 sm:mb-4">
                     <div class="text-sm text-gray-500 mb-1">Starting from</div>
-                    <div class="text-3xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
+                    <div class="text-2xl md:text-3xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
                     <div class="text-sm text-gray-500">per hour</div>
                 </div>
                 
                 @auth
                     @if($ground->is_under_maintenance)
-                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-center">
-                            <i class="fas fa-tools mr-1"></i> Under Maintenance
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
+                            <i class="fas fa-tools mr-2"></i> Under Maintenance
                         </div>
                     @elseif(auth()->user()->canBook())
                         <a href="{{ route('bookings.create', $ground) }}" 
-                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl font-semibold text-lg transition shadow-lg shadow-green-200">
+                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 md:py-4 rounded-lg sm:rounded-xl font-semibold text-sm md:text-lg transition shadow-lg shadow-green-200">
                             <i class="fas fa-calendar-check mr-2"></i> Book Now
                         </a>
                     @else
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Account suspended
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> Account suspended
                         </div>
                     @endif
                 @else
                     @if($ground->is_under_maintenance)
-                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-center">
-                            <i class="fas fa-tools mr-1"></i> Under Maintenance
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
+                            <i class="fas fa-tools mr-2"></i> Under Maintenance
                         </div>
                     @else
                         <a href="{{ route('login') }}" 
-                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-4 rounded-xl font-semibold text-lg transition shadow-lg shadow-green-200">
+                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 md:py-4 rounded-lg sm:rounded-xl font-semibold text-sm md:text-lg transition shadow-lg shadow-green-200">
                             <i class="fas fa-sign-in-alt mr-2"></i> Login to Book
                         </a>
                     @endif
@@ -486,87 +489,88 @@
             </div>
 
             <!-- Contact Info Card -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-address-book text-green-500 mr-2"></i> Contact Information
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6">
+                <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                    <i class="fas fa-address-book text-green-500 mr-2 text-lg"></i> Contact Info
                 </h3>
                 <div class="flex items-center mb-4">
-                    <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                        <span class="text-green-600 font-bold text-xl">{{ substr($ground->owner->name, 0, 1) }}</span>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                        <span class="text-green-600 font-bold text-lg">{{ substr($ground->owner->name, 0, 1) }}</span>
                     </div>
-                    <div>
-                        <div class="font-semibold text-gray-900 text-lg">{{ $ground->owner->name }}</div>
+                    <div class="min-w-0">
+                        <div class="font-semibold text-gray-900 text-lg truncate">{{ $ground->owner->name }}</div>
                         <div class="text-sm text-gray-500">Ground Owner</div>
                     </div>
                 </div>
                 
                 <!-- Contact Info -->
-                <div class="space-y-3 border-t border-gray-100 pt-4">
+                <div class="space-y-2 sm:space-y-3 border-t border-gray-100 pt-3 sm:pt-4">
                     @if($ground->phone)
                         <div class="flex items-center text-sm">
-                            <i class="fas fa-phone text-green-500 w-5"></i>
-                            <span class="text-gray-700 font-medium ml-2">{{ $ground->phone }}</span>
+                            <i class="fas fa-phone text-green-500 w-5 flex-shrink-0"></i>
+                            <span class="text-gray-700 font-medium ml-2 truncate">{{ $ground->phone }}</span>
                         </div>
                         <a href="tel:{{ $ground->phone }}" 
-                           class="flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium transition">
+                           class="flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg sm:rounded-xl font-medium transition text-sm">
                             <i class="fas fa-phone-alt mr-2"></i> Call Now
                         </a>
                     @else
-                        <div class="flex items-center text-sm">
-                            <i class="fas fa-envelope text-green-500 w-5"></i>
-                            <span class="text-gray-600 ml-2">{{ $ground->owner->email }}</span>
+                        <div class="flex items-center text-sm truncate">
+                            <i class="fas fa-envelope text-green-500 w-5 flex-shrink-0"></i>
+                            <span class="text-gray-600 ml-2 truncate">{{ $ground->owner->email }}</span>
                         </div>
                     @endif
                 </div>
             </div>
 
             <!-- Quick Facts -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-clipboard-list text-green-500 mr-2"></i> Quick Facts
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                    <i class="fas fa-clipboard-list text-green-500 mr-2 text-lg"></i> Quick Facts
                 </h3>
                 <ul class="space-y-3">
-                    <li class="flex items-center text-sm">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    <li class="flex items-start gap-3 text-base">
+                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
                         <span class="text-gray-600">{{ $ground->sportType->name }} facility</span>
                     </li>
                     @if($ground->capacity)
-                        <li class="flex items-center text-sm">
-                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <li class="flex items-start gap-3 text-base">
+                            <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
                             <span class="text-gray-600">{{ $ground->capacity }} capacity</span>
                         </li>
                     @endif
                     @if($ground->night_rate_per_hour)
-                        <li class="flex items-center text-sm">
-                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <li class="flex items-start gap-3 text-base">
+                            <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
                             <span class="text-gray-600">Night lighting available</span>
                         </li>
                     @endif
-                    <li class="flex items-center text-sm">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    <li class="flex items-start gap-3 text-base">
+                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
                         <span class="text-gray-600">{{ $ground->total_bookings }}+ successful bookings</span>
                     </li>
-                    <li class="flex items-center text-sm">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    <li class="flex items-start gap-3 text-base">
+                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
                         <span class="text-gray-600">Instant confirmation</span>
                     </li>
                 </ul>
             </div>
-        </div>
     </div>
 
     <!-- Reviews Section -->
-    <div class="mt-8" id="reviews-section">
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+    <div class="mt-6 sm:mt-8 w-full mx-auto max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16" id="reviews-section">
+        <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-4 sm:mb-6">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center flex-shrink-0">
                     <i class="fas fa-star text-yellow-400 mr-2"></i> 
                     Reviews & Ratings
                 </h2>
-                <div class="flex items-center">
-                    <div class="text-3xl font-bold text-gray-900 mr-2">{{ number_format($ground->average_rating, 1) }}</div>
+                <div class="flex items-center gap-4 flex-shrink-0">
                     <div>
-                        <div class="flex text-yellow-400">
+                        <div class="text-3xl font-bold text-gray-900">{{ number_format($ground->average_rating, 1) }}</div>
+                    </div>
+                    <div>
+                        <div class="flex text-yellow-400 text-base">
                             @for($i = 1; $i <= 5; $i++)
                                 @if($i <= floor($ground->average_rating))
                                     <i class="fas fa-star"></i>
@@ -577,18 +581,18 @@
                                 @endif
                             @endfor
                         </div>
-                        <div class="text-xs text-gray-500 mt-1">{{ $ground->total_reviews }} reviews</div>
+                        <div class="text-sm text-gray-500 mt-1">{{ $ground->total_reviews }} reviews</div>
                     </div>
                 </div>
             </div>
 
             @guest
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6 text-center">
-                    <i class="fas fa-lock text-gray-400 text-4xl mb-3"></i>
-                    <p class="text-gray-600 mb-4">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 text-center">
+                    <i class="fas fa-lock text-gray-400 text-3xl sm:text-4xl mb-2 sm:mb-3"></i>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
                         Please login to view ratings and reviews
                     </p>
-                    <a href="{{ route('login') }}" class="inline-block px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">
+                    <a href="{{ route('login') }}" class="inline-block px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition text-sm sm:text-base">
                         <i class="fas fa-sign-in-alt mr-2"></i> Login
                     </a>
                 </div>
@@ -601,33 +605,32 @@
                 @endphp
 
                 @if($existingReview)
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                    <h3 class="font-semibold text-blue-900 mb-3 flex items-center">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                    <h3 class="font-semibold text-blue-900 mb-2 sm:mb-3 flex items-center text-sm sm:text-base">
                         <i class="fas fa-info-circle mr-2"></i> Your Review
                     </h3>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                         <div>
-                            <div class="flex text-yellow-400 mb-2">
+                            <div class="flex text-yellow-400 mb-1 sm:mb-2 text-sm sm:text-base">
                                 @for($i = 1; $i <= 5; $i++)
-                                        <i class="{{ $i <= $existingReview->rating ? 'fas' : 'far' }} fa-star"></i>
-                                    @endfor
-                                    <span class="ml-2 text-gray-600 text-sm">{{ $existingReview->rating }} / 5</span>
-                                </div>
-                                @if($existingReview->comment)
-                                    <p class="text-gray-700 text-sm">{{ $existingReview->comment }}</p>
-                                @endif
-                                <p class="text-xs text-gray-500 mt-2">Submitted {{ $existingReview->created_at->diffForHumans() }}</p>
+                                    <i class="{{ $i <= $existingReview->rating ? 'fas' : 'far' }} fa-star"></i>
+                                @endfor
+                                <span class="ml-2 text-gray-600 text-xs sm:text-sm">{{ $existingReview->rating }} / 5</span>
                             </div>
-                            <form action="{{ route('reviews.destroy', $existingReview) }}" method="POST" 
-                                  onsubmit="return confirm('Are you sure you want to delete your review? You can submit a new one after deleting.')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition flex items-center">
-                                    <i class="fas fa-trash mr-2"></i> Delete & Re-rate
-                                </button>
-                            </form>
+                            @if($existingReview->comment)
+                                <p class="text-gray-700 text-xs sm:text-sm">{{ $existingReview->comment }}</p>
+                            @endif
+                            <p class="text-xs text-gray-500 mt-2">Submitted {{ $existingReview->created_at->diffForHumans() }}</p>
                         </div>
+                        <form action="{{ route('reviews.destroy', $existingReview) }}" method="POST" 
+                              onsubmit="return confirm('Are you sure you want to delete your review? You can submit a new one after deleting.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition flex items-center">
+                                <i class="fas fa-trash mr-2"></i> Delete & Re-rate
+                            </button>
+                        </form>
                     </div>
                 @else
                     <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
