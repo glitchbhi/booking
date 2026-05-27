@@ -23,6 +23,8 @@ class OwnerRequest extends Model
         'ground_images',
         'business_address',
         'contact_number',
+        'bank_name',
+        'account_number',
         'opening_time',
         'closing_time',
         'facilities',

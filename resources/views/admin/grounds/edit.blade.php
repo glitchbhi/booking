@@ -7,7 +7,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Ground</h1>
         
-        <form action="{{ route('owner.grounds.update', $ground) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.grounds.update', $ground) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
@@ -310,234 +310,36 @@
                     </label>
                 </div>
 
-                            </div>
+            </div>
 
             <div class="mt-6 flex space-x-4">
                 <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 font-semibold">
                     <i class="fas fa-save"></i> Update Ground
                 </button>
-                <a href="{{ route('owner.grounds.index') }}" 
+                <a href="{{ route('admin.grounds.show', $ground) }}" 
                    class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-md hover:bg-gray-300 text-center font-semibold">
                     Cancel
                 </a>
             </div>
         </form>
-
-        <!-- Maintenance Schedule Section -->
-        <div class="mt-6 border-t pt-6">
-            
-            @if($ground->is_under_maintenance)
-                <!-- GROUND IS UNDER MAINTENANCE - Show Make Available Now -->
-                <h3 class="text-lg font-semibold mb-4">Ground Under Maintenance</h3>
-                
-                @if($ground->maintenance_start_date)
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-                        <p class="text-sm text-yellow-800 mb-2">
-                            <i class="fas fa-info-circle"></i> Current maintenance schedule:
-                        </p>
-                        <ul class="text-sm text-yellow-700 space-y-1">
-                            <li><strong>Start:</strong> {{ $ground->maintenance_start_date ? $ground->maintenance_start_date->format('M d, Y h:i A') : 'Not set' }}</li>
-                            <li><strong>End:</strong> {{ $ground->maintenance_end_date ? $ground->maintenance_end_date->format('M d, Y h:i A') : 'Not set' }}</li>
-                            @if($ground->maintenance_reason)
-                                <li><strong>Reason:</strong> {{ $ground->maintenance_reason }}</li>
-                            @endif
-                            @if(!$ground->isMaintenanceExpired())
-                                <li><strong>Remaining Time:</strong> {{ $ground->getMaintenanceRemainingTime() }}</li>
-                            @endif
-                        </ul>
-                    </div>
-                @endif
-
-                <!-- Make Available Now Form -->
-                <form action="{{ route('owner.grounds.toggle-maintenance', $ground) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold">
-                        <i class="fas fa-check-circle"></i> Make Available Now
-                    </button>
-                </form>
-            
-            @else
-                <!-- GROUND IS AVAILABLE - Show Schedule Maintenance form -->
-                <h3 class="text-lg font-semibold mb-4">Schedule Maintenance</h3>
-                
-                <form action="{{ route('owner.grounds.schedule-maintenance', $ground) }}" method="POST" class="space-y-4">
-                    @csrf
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Maintenance Schedule <span class="text-red-500">*</span>
-                        </label>
-                        <div class="bg-white border border-gray-300 rounded-md p-4" x-data="maintenanceDatePicker()">
-                            <div class="space-y-4">
-                                <!-- Start Date -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600 mb-2">
-                                        <i class="fas fa-calendar-check text-blue-600"></i> Start Date & Time
-                                    </label>
-                                    <input type="datetime-local" 
-                                           id="maintenance_start_date"
-                                           name="maintenance_start_date" 
-                                           x-model="startDate"
-                                           @change="validateDates()"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                           :min="minDateTime"
-                                           required>
-                                    @error('maintenance_start_date')
-                                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <!-- End Date (Optional) -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600 mb-2">
-                                        <i class="fas fa-calendar-times text-orange-600"></i> End Date & Time (Optional)
-                                    </label>
-                                    <input type="datetime-local" 
-                                           id="maintenance_end_date"
-                                           name="maintenance_end_date" 
-                                           x-model="endDate"
-                                           @change="validateDates()"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                           :min="startDate || minDateTime">
-                                    <p class="text-xs text-gray-500 mt-1">Leave empty if maintenance duration is unknown</p>
-                                    @error('maintenance_end_date')
-                                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <!-- Duration Display -->
-                                <div x-show="startDate && endDate" class="bg-blue-50 border border-blue-200 rounded-md p-3">
-                                    <p class="text-sm text-gray-700">
-                                        <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
-                                        <strong>Duration:</strong> <span x-text="getDuration()"></span>
-                                    </p>
-                                </div>
-
-                                <!-- Error Message -->
-                                <div x-show="dateError" class="bg-red-50 border border-red-200 rounded-md p-3">
-                                    <p class="text-sm text-red-700" x-text="dateError"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="maintenance_reason" class="block text-sm font-medium text-gray-700 mb-1">
-                            Maintenance Reason (optional)
-                        </label>
-                        <textarea id="maintenance_reason" name="maintenance_reason" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                  placeholder="e.g., Facility repairs, equipment maintenance, etc.">{{ old('maintenance_reason', $ground->maintenance_reason) }}</textarea>
-                        @error('maintenance_reason')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-semibold">
-                        <i class="fas fa-calendar-check"></i> Schedule Maintenance
-                    </button>
-                </form>
-            @endif
-        </div>
-
-        <div class="mt-6 border-t pt-6">
-            <form action="{{ route('owner.grounds.destroy', $ground) }}" method="POST" 
-                  onsubmit="return confirm('Are you sure you want to delete this ground? This action cannot be undone.')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">
-                    <i class="fas fa-trash"></i> Delete Ground
-                </button>
-            </form>
-        </div>
-
-        <script>
-
-            function maintenanceDatePicker() {
-                return {
-                    startDate: '{{ old('maintenance_start_date', $ground->maintenance_start_date ? $ground->maintenance_start_date->format('Y-m-d\TH:i') : '') }}',
-                    endDate: '{{ old('maintenance_end_date', $ground->maintenance_end_date ? $ground->maintenance_end_date->format('Y-m-d\TH:i') : '') }}',
-                    dateError: '',
-                    
-                    get minDateTime() {
-                        const now = new Date();
-                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                        return now.toISOString().slice(0, 16);
-                    },
-                    
-                    validateDates() {
-                        this.dateError = '';
-                        
-                        if (!this.startDate) {
-                            this.dateError = 'Start date is required';
-                            return;
-                        }
-                        
-                        if (this.startDate < this.minDateTime) {
-                            this.dateError = 'Start date cannot be in the past';
-                            this.startDate = '';
-                            return;
-                        }
-                        
-                        if (this.endDate && this.endDate <= this.startDate) {
-                            this.dateError = 'End date must be after start date';
-                            this.endDate = '';
-                            return;
-                        }
-                    },
-                    
-                    getDuration() {
-                        if (!this.startDate || !this.endDate) return '';
-                        
-                        const start = new Date(this.startDate);
-                        const end = new Date(this.endDate);
-                        const diff = Math.abs(end - start);
-                        
-                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        
-                        let duration = '';
-                        if (days > 0) duration += `${days} day${days > 1 ? 's' : ''} `;
-                        if (hours > 0) duration += `${hours} hour${hours > 1 ? 's' : ''} `;
-                        if (minutes > 0) duration += `${minutes} minute${minutes > 1 ? 's' : ''}`;
-                        
-                        return duration.trim();
-                    }
-                }
-            }
-        </script>
     </div>
 </div>
 
 <script>
 document.getElementById('images').addEventListener('change', function(e) {
     const preview = document.getElementById('image-preview');
-    const files = Array.from(e.target.files);
-    const currentImages = {{ $ground->images ? count($ground->images) : 0 }};
-    const remainingSlots = 4 - currentImages;
-    
-    if (files.length > remainingSlots) {
-        alert(`You can only add ${remainingSlots} more photo(s). Remove old photos first to add more.`);
-    }
-    
     preview.innerHTML = '';
     
-    files.slice(0, remainingSlots).forEach((file, index) => {
+    for (let file of e.target.files) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const div = document.createElement('div');
-            div.className = 'relative border-2 border-green-500 rounded-lg overflow-hidden';
-            div.innerHTML = `
-                <img src="${e.target.result}" class="h-32 w-full object-cover">
-                <div class="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center">
-                    New Photo ${index + 1}
-                </div>
-            `;
-            preview.appendChild(div);
-        }
+        reader.onload = function(event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.className = 'w-full h-32 object-cover rounded border border-gray-300';
+            preview.appendChild(img);
+        };
         reader.readAsDataURL(file);
-    });
+    }
 });
 </script>
 @endsection

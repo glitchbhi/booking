@@ -11,10 +11,10 @@
         </a>
     </div>
     
-    <!-- Filter by Ground -->
+    <!-- Filter by Ground and Status -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <form action="{{ route('owner.bookings.index') }}" method="GET" class="flex space-x-4">
-            <select name="ground_id" class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+        <form action="{{ route('owner.bookings.index') }}" method="GET" class="flex flex-wrap gap-4">
+            <select name="ground_id" class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="">All Grounds</option>
                 @foreach($ownerGrounds as $g)
                     <option value="{{ $g->id }}" {{ request('ground_id') == $g->id ? 'selected' : '' }}>
@@ -22,6 +22,29 @@
                     </option>
                 @endforeach
             </select>
+            
+            <select name="status" class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="">All Statuses</option>
+                <option value="payment_submitted" {{ request('status') == 'payment_submitted' ? 'selected' : '' }}>
+                    Payment Submitted
+                </option>
+                <option value="waiting_approval" {{ request('status') == 'waiting_approval' ? 'selected' : '' }}>
+                    Waiting Approval
+                </option>
+                <option value="booked" {{ request('status') == 'booked' ? 'selected' : '' }}>
+                    Confirmed
+                </option>
+                <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>
+                    Ongoing
+                </option>
+                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+                    Completed
+                </option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
+                    Cancelled
+                </option>
+            </select>
+            
             <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
                 Filter
             </button>
@@ -29,53 +52,92 @@
     </div>
 
     @if($bookings->count() > 0)
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="bg-white rounded-lg shadow-md overflow-x-auto">
+            <table class="min-w-[800px] w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking #</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ground</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Proof</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking #</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ground</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($bookings as $booking)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $booking->booking_number }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->ground->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->user->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->start_time->format('M d, Y h:i A') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $booking->duration_hours }} hrs</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">BTN {{ number_format($booking->total_amount, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium">{{ $booking->booking_number }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm">{{ $booking->ground->name }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm">{{ $booking->user->name }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm">{{ $booking->start_time->format('M d, Y h:i A') }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm">{{ $booking->duration_hours }} hrs</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm font-semibold">BTN {{ number_format($booking->total_amount, 2) }}</td>
+                            <td class="px-3 py-3 whitespace-nowrap text-sm">
                                 @if($booking->payment_proof)
                                     <button onclick="showPaymentProof('{{ asset('storage/' . $booking->payment_proof) }}', '{{ $booking->booking_number }}')" 
-                                            class="text-blue-600 hover:text-blue-800">
+                                            class="text-blue-600 hover:text-blue-800 text-xs">
                                         <i class="fas fa-image"></i> View
                                     </button>
                                 @else
-                                    <span class="text-gray-400">No proof</span>
+                                    <span class="text-gray-400 text-xs">No proof</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs rounded-full
-                                    {{ $booking->status === 'booked' ? 'bg-blue-100 text-blue-800' : '' }}
-                                    {{ $booking->status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
-                                    {{ $booking->status === 'completed' ? 'bg-gray-100 text-gray-800' : '' }}
-                                    {{ $booking->status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
-                                    {{ ucfirst($booking->status) }}
-                                </span>
+                            <td class="px-3 py-3 whitespace-nowrap">
+                                @if($booking->status === 'payment_submitted')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                                        <i class="fas fa-paper-plane mr-1"></i> Payment Submitted
+                                    </span>
+                                @elseif($booking->status === 'waiting_approval')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
+                                        <i class="fas fa-hourglass-half mr-1"></i> Waiting Approval
+                                    </span>
+                                @elseif($booking->status === 'booked')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i> Confirmed
+                                    </span>
+                                @elseif($booking->status === 'ongoing')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Ongoing</span>
+                                @elseif($booking->status === 'completed')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Completed</span>
+                                @elseif($booking->status === 'cancelled')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Cancelled</span>
+                                @elseif($booking->status === 'expired')
+                                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Expired</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs rounded-full {{ $booking->is_offline ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $booking->is_offline ? 'Offline' : 'Online' }}
                                 </span>
+                            </td>
+                            <td class="px-3 py-3 whitespace-nowrap">
+                                @if($booking->status === 'waiting_approval')
+                                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                                        <form action="{{ route('owner.bookings.approve', $booking) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" 
+                                                    onclick="return confirm('Are you sure you want to approve this booking?')"
+                                                    class="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-green-700 w-full sm:w-auto">
+                                                <i class="fas fa-check mr-1"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('owner.bookings.reject', $booking) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" 
+                                                    onclick="return confirm('Are you sure you want to reject this booking?')"
+                                                    class="bg-red-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-red-700 w-full sm:w-auto">
+                                                <i class="fas fa-times mr-1"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 text-xs">No actions</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

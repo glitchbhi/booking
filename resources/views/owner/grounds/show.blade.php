@@ -73,18 +73,18 @@
             <a href="{{ route('owner.grounds.availability', $ground) }}" class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-md text-xs sm:text-sm">
                 <i class="fas fa-calendar text-xs sm:text-sm"></i> <span class="hidden sm:inline">Manage Availability</span><span class="sm:hidden">Availability</span>
             </a>
-            @if(!$ground->is_under_maintenance)
-                <form action="{{ route('owner.grounds.toggle-maintenance', $ground) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-md text-xs sm:text-sm">
-                        <i class="fas fa-tools text-xs sm:text-sm"></i> <span class="hidden sm:inline">Mark Under Maintenance</span><span class="sm:hidden">Maintenance</span>
-                    </button>
-                </form>
-            @endif
+            <button onclick="openMaintenanceModal({{ $ground->id }})" class="{{ $ground->is_under_maintenance ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700' }} text-white px-3 sm:px-4 md:px-6 py-2 rounded-md text-xs sm:text-sm">
+                <i class="fas {{ $ground->is_under_maintenance ? 'fa-check' : 'fa-tools' }} text-xs sm:text-sm"></i> 
+                <span class="hidden sm:inline">{{ $ground->is_under_maintenance ? 'Update Maintenance' : 'Schedule Maintenance' }}</span>
+                <span class="sm:hidden">{{ $ground->is_under_maintenance ? 'Update' : 'Schedule' }}</span>
+            </button>
             <a href="{{ route('owner.grounds.index') }}" class="bg-gray-200 text-gray-700 px-3 sm:px-4 md:px-6 py-2 rounded-md hover:bg-gray-300 text-xs sm:text-sm">
                 <i class="fas fa-arrow-left text-xs sm:text-sm"></i> Back
             </a>
         </div>
+
+        <!-- Maintenance Modal Component -->
+        @include('components.maintenance-modal', ['ground' => $ground, 'routeName' => 'owner.grounds.schedule-maintenance'])
     </div>
 </div>
 @endsection

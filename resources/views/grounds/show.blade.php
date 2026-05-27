@@ -298,9 +298,10 @@
                                 </div>
                             </div>
                             <div class="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-gray-900">
-                                BTN {{ number_format($ground->night_rate_per_hour, 0) }}
+                                BTN {{ number_format($ground->night_rate_per_hour * 1.03, 0) }}
                                 <span class="text-xs sm:text-sm font-normal text-gray-500">/ hour</span>
                             </div>
+                            <p class="text-xs text-gray-600 mt-1"><span class="text-gray-400">(+3% admin fee)</span></p>
                         </div>
                     @else
                         <div class="bg-gray-50 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 border border-gray-200 flex items-center justify-center">
@@ -336,12 +337,32 @@
                     $today = \Carbon\Carbon::today();
                     $now = \Carbon\Carbon::now();
                     $startHour = 6; // 6 AM
-                    $endHour = 23; // 11 PM
+                    // Get end hour from ground's night_rate_end, default to 23 (11 PM)
+                    $endHour = $ground->night_rate_end ? \Carbon\Carbon::parse($ground->night_rate_end)->hour : 23;
                     
+                    // Generate array of hours, handling midnight crossing
+                    $hours = [];
+                    if ($endHour >= $startHour) {
+                        // Normal case: 6 AM to 11 PM (6 to 23)
+                        for ($h = $startHour; $h < $endHour; $h++) {
+                            $hours[] = $h;
+                        }
+                    } else {
+                        // Midnight crossing: 6 AM to midnight, then midnight to end hour (e.g., 6 to 24, then 0 to 2)
+                        for ($h = $startHour; $h < 24; $h++) {
+                            $hours[] = $h;
+                        }
+                        for ($h = 0; $h < $endHour; $h++) {
+                            $hours[] = $h;
+                        }
+                    }
+                @endphp
+
+                @php
                     // Get bookings for next 30 days with user information
                     $upcomingBookings = $ground->bookings()
                         ->with('user')
-                        ->whereIn('status', ['booked', 'ongoing'])
+                        ->whereIn('status', ['booked', 'ongoing', 'pending', 'payment_submitted', 'waiting_approval'])
                         ->where('start_time', '>=', $today)
                         ->where('start_time', '<=', $today->copy()->addDays(30))
                         ->get()
@@ -361,7 +382,7 @@
                         <template x-if="selectedDate === '{{ $dateKey }}'">
                             <div class="col-span-full">
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-0.5 sm:gap-1 md:gap-2">
-                                    @for($hour = $startHour; $hour < $endHour; $hour++)
+                                    @foreach($hours as $hour)
                                         @foreach([0, 30] as $minute)
                                             @php
                                                 $slotStart = $checkDate->copy()->setHour($hour)->setMinute($minute)->setSecond(0);
@@ -374,6 +395,10 @@
                                                 
                                                 $bookedBy = null;
                                                 $isBooked = $dateBookings->contains(function($booking) use ($slotStart, $slotEnd, &$bookedBy) {
+                                                    // Only check for confirmed bookings (not pending ones)
+                                                    if (!in_array($booking->status, ['booked', 'ongoing'])) {
+                                                        return false;
+                                                    }
                                                     $bookingStart = \Carbon\Carbon::parse($booking->start_time);
                                                     $bookingEnd = \Carbon\Carbon::parse($booking->end_time);
                                                     $overlaps = ($bookingStart < $slotEnd && $bookingEnd > $slotStart);
@@ -382,19 +407,40 @@
                                                     }
                                                     return $overlaps;
                                                 });
+
+                                                // Check if slot is under booking (pending status)
+                                                $isUnderBooking = false;
+                                                foreach ($dateBookings as $booking) {
+                                                    $bookingStart = \Carbon\Carbon::parse($booking->start_time);
+                                                    $bookingEnd = \Carbon\Carbon::parse($booking->end_time);
+                                                    
+                                                    // Skip expired bookings
+                                                    if ($booking->status === 'pending' && $booking->expires_at && \Carbon\Carbon::now()->gt($booking->expires_at)) {
+                                                        continue;
+                                                    }
+                                                    
+                                                    // Only mark slot as under booking if it starts before the booking ends
+                                                    if (in_array($booking->status, ['pending', 'payment_submitted', 'waiting_approval']) && 
+                                                        $bookingStart <= $slotStart && $bookingEnd > $slotStart) {
+                                                        $isUnderBooking = true;
+                                                        break;
+                                                    }
+                                                }
                                             @endphp
                                             
                                             <div class="relative group">
                                                 <div class="
                                                     px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 lg:px-3 lg:py-3 rounded text-center border-2 transition-all
-                                                    {{ $isBooked ? 'bg-red-50 border-red-400 shadow-sm' : 'bg-green-50 border-green-400 hover:border-green-500 hover:shadow-md' }}
+                                                    {{ $isBooked ? 'bg-red-50 border-red-400 shadow-sm' : ($isUnderBooking ? 'bg-yellow-50 border-yellow-400 shadow-sm' : 'bg-green-50 border-green-400 hover:border-green-500 hover:shadow-md') }}
                                                 ">
-                                                    <div class="text-xs sm:text-xs md:text-sm font-bold {{ $isBooked ? 'text-red-700' : 'text-green-700' }}">
+                                                    <div class="text-xs sm:text-xs md:text-sm font-bold {{ $isBooked ? 'text-red-700' : ($isUnderBooking ? 'text-yellow-700' : 'text-green-700') }}">
                                                         {{ $slotStart->format('g:i A') }}
                                                     </div>
-                                                    <div class="text-xs mt-0.5 md:mt-1 font-semibold {{ $isBooked ? 'text-red-600' : 'text-green-600' }}">
+                                                    <div class="text-xs mt-0.5 md:mt-1 font-semibold {{ $isBooked ? 'text-red-600' : ($isUnderBooking ? 'text-yellow-600' : 'text-green-600') }}">
                                                         @if($isBooked)
                                                             <i class="fas fa-times-circle hidden sm:inline"></i> <span class="sm:hidden">❌</span><span class="hidden sm:inline">Booked</span>
+                                                        @elseif($isUnderBooking)
+                                                            <i class="fas fa-clock hidden sm:inline"></i> <span class="sm:hidden">⏰</span><span class="hidden sm:inline">Under Booking</span>
                                                         @else
                                                             <i class="fas fa-check-circle hidden sm:inline"></i> <span class="sm:hidden">✅</span><span class="hidden sm:inline">Free</span>
                                                         @endif
@@ -410,8 +456,14 @@
                                                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 whitespace-nowrap">
                                                     <div class="bg-gray-900 text-white text-xs rounded px-2 py-1 sm:px-3 sm:py-2 shadow-lg">
                                                         {{ $slotStart->format('g:i A') }} - {{ $slotEnd->format('g:i A') }}
-                                                        <div class="text-xs font-semibold {{ $isBooked ? 'text-red-400' : 'text-green-400' }}">
-                                                            {{ $isBooked ? '❌ Booked' : '✅ Available' }}
+                                                        <div class="text-xs font-semibold {{ $isBooked ? 'text-red-400' : ($isUnderBooking ? 'text-yellow-400' : 'text-green-400') }}">
+                                                            @if($isBooked)
+                                                                ❌ Booked
+                                                            @elseif($isUnderBooking)
+                                                                ⏰ Under Booking
+                                                            @else
+                                                                ✅ Available
+                                                            @endif
                                                         </div>
                                                         @if($isBooked && $bookedBy)
                                                             <div class="text-xs text-gray-300 mt-1">
@@ -423,7 +475,7 @@
                                                 </div>
                                             </div>
                                         @endforeach
-                                    @endfor
+                                    @endforeach
                                 </div>
                             </div>
                         </template>
@@ -439,127 +491,109 @@
                         <div class="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-red-50 border-2 border-red-400 rounded mr-1 sm:mr-2"></div>
                         <span class="text-gray-600"><i class="fas fa-times-circle text-red-600 mr-1 hidden sm:inline"></i><span class="sm:hidden">❌</span>Booked</span>
                     </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-yellow-50 border-2 border-yellow-400 rounded mr-1 sm:mr-2"></div>
+                        <span class="text-gray-600"><i class="fas fa-clock text-yellow-600 mr-1 hidden sm:inline"></i><span class="sm:hidden">⏰</span>Under Booking</span>
+                    </div>
                 </div>
                 
                 <p class="text-xs text-gray-500 mt-2 sm:mt-3">
                     <i class="fas fa-info-circle"></i> 30-minute slots. Select a date to view availability.
                 </p>
             </div>
-        </div>
-            @endif
-        </div>
 
-        <!-- Sidebar -->
-        <div class="xl:col-span-1 space-y-4 sm:space-y-6">
-            <!-- Book Now Card -->
-            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 sticky top-4">
-                <div class="text-center mb-3 sm:mb-4">
-                    <div class="text-sm text-gray-500 mb-1">Starting from</div>
-                    <div class="text-2xl md:text-3xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
-                    <div class="text-sm text-gray-500">per hour</div>
-                </div>
-                
-                @auth
-                    @if($ground->is_under_maintenance)
-                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
-                            <i class="fas fa-tools mr-2"></i> Under Maintenance
+            <!-- Book Now Section -->
+            <div class="mt-6 sm:mt-8">
+                <div class="space-y-4 sm:space-y-6">
+                    <!-- Book Now Card -->
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 h-fit">
+                        <div class="text-center mb-4 sm:mb-6">
+                            <div class="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">Starting from</div>
+                            <div class="text-3xl sm:text-4xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
+                            <div class="text-xs sm:text-sm text-gray-500 mt-1">per hour</div>
                         </div>
-                    @elseif(auth()->user()->canBook())
-                        <a href="{{ route('bookings.create', $ground) }}" 
-                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 md:py-4 rounded-lg sm:rounded-xl font-semibold text-sm md:text-lg transition shadow-lg shadow-green-200">
-                            <i class="fas fa-calendar-check mr-2"></i> Book Now
-                        </a>
-                    @else
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
-                            <i class="fas fa-exclamation-triangle mr-2"></i> Account suspended
-                        </div>
-                    @endif
-                @else
-                    @if($ground->is_under_maintenance)
-                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg sm:rounded-xl text-center text-sm">
-                            <i class="fas fa-tools mr-2"></i> Under Maintenance
-                        </div>
-                    @else
-                        <a href="{{ route('login') }}" 
-                           class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 md:py-4 rounded-lg sm:rounded-xl font-semibold text-sm md:text-lg transition shadow-lg shadow-green-200">
-                            <i class="fas fa-sign-in-alt mr-2"></i> Login to Book
-                        </a>
-                    @endif
-                @endauth
-            </div>
-
-            <!-- Contact Info Card -->
-            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">
-                    <i class="fas fa-address-book text-green-500 mr-2 text-lg"></i> Contact Info
-                </h3>
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                        <span class="text-green-600 font-bold text-lg">{{ substr($ground->owner->name, 0, 1) }}</span>
+                        
+                        @auth
+                            @if($ground->is_under_maintenance)
+                                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-center text-xs sm:text-sm">
+                                    <i class="fas fa-tools mr-2"></i> <span class="hidden sm:inline">Under Maintenance</span><span class="sm:hidden">Maintenance</span>
+                                </div>
+                            @elseif(auth()->user()->canBook())
+                                <a href="{{ route('bookings.create', $ground) }}" 
+                                   class="block w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-center py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition shadow-lg shadow-green-200">
+                                    <i class="fas fa-calendar-check mr-2"></i> Book Now
+                                </a>
+                            @else
+                                <div class="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-center text-xs sm:text-sm">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> <span class="hidden sm:inline">Account suspended</span><span class="sm:hidden">Suspended</span>
+                                </div>
+                            @endif
+                        @else
+                            @if($ground->is_under_maintenance)
+                                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-center text-xs sm:text-sm">
+                                    <i class="fas fa-tools mr-2"></i> <span class="hidden sm:inline">Under Maintenance</span><span class="sm:hidden">Maintenance</span>
+                                </div>
+                            @else
+                                <a href="{{ route('login') }}" 
+                                   class="block w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-center py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition shadow-lg shadow-green-200">
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Login to Book
+                                </a>
+                            @endif
+                        @endauth
                     </div>
-                    <div class="min-w-0">
-                        <div class="font-semibold text-gray-900 text-lg truncate">{{ $ground->owner->name }}</div>
-                        <div class="text-sm text-gray-500">Ground Owner</div>
+
+                    <!-- Contact Info Card -->
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 h-fit">
+                        <h3 class="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center text-base sm:text-lg">
+                            <i class="fas fa-address-book text-green-500 mr-2 text-base sm:text-lg"></i> Contact Info
+                        </h3>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                                <span class="text-green-600 font-bold text-sm sm:text-lg">{{ substr($ground->owner->name, 0, 1) }}</span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900 text-sm sm:text-lg truncate">{{ $ground->owner->name }}</div>
+                                <div class="text-xs sm:text-sm text-gray-500">Ground Owner</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Facts -->
+                    <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 h-fit">
+                        <h3 class="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center text-base sm:text-lg">
+                            <i class="fas fa-clipboard-list text-green-500 mr-2 text-base sm:text-lg"></i> Quick Facts
+                        </h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                                <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-xs sm:text-sm"></i>
+                                <span class="text-gray-600">{{ $ground->sportType->name }} facility</span>
+                            </li>
+                            @if($ground->capacity)
+                                <li class="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                                    <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-xs sm:text-sm"></i>
+                                    <span class="text-gray-600">{{ $ground->capacity }} capacity</span>
+                                </li>
+                            @endif
+                            @if($ground->night_rate_per_hour)
+                                <li class="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                                    <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-xs sm:text-sm"></i>
+                                    <span class="text-gray-600">Night lighting available</span>
+                                </li>
+                            @endif
+                            <li class="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                                <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-xs sm:text-sm"></i>
+                                <span class="text-gray-600">{{ $ground->total_bookings }}+ bookings</span>
+                            </li>
+                            <li class="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm">
+                                <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-xs sm:text-sm"></i>
+                                <span class="text-gray-600">Instant confirmation</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                
-                <!-- Contact Info -->
-                <div class="space-y-2 sm:space-y-3 border-t border-gray-100 pt-3 sm:pt-4">
-                    @if($ground->phone)
-                        <div class="flex items-center text-sm">
-                            <i class="fas fa-phone text-green-500 w-5 flex-shrink-0"></i>
-                            <span class="text-gray-700 font-medium ml-2 truncate">{{ $ground->phone }}</span>
-                        </div>
-                        <a href="tel:{{ $ground->phone }}" 
-                           class="flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg sm:rounded-xl font-medium transition text-sm">
-                            <i class="fas fa-phone-alt mr-2"></i> Call Now
-                        </a>
-                    @else
-                        <div class="flex items-center text-sm truncate">
-                            <i class="fas fa-envelope text-green-500 w-5 flex-shrink-0"></i>
-                            <span class="text-gray-600 ml-2 truncate">{{ $ground->owner->email }}</span>
-                        </div>
-                    @endif
-                </div>
             </div>
-
-            <!-- Quick Facts -->
-            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-4 sm:p-6">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">
-                    <i class="fas fa-clipboard-list text-green-500 mr-2 text-lg"></i> Quick Facts
-                </h3>
-                <ul class="space-y-3">
-                    <li class="flex items-start gap-3 text-base">
-                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
-                        <span class="text-gray-600">{{ $ground->sportType->name }} facility</span>
-                    </li>
-                    @if($ground->capacity)
-                        <li class="flex items-start gap-3 text-base">
-                            <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
-                            <span class="text-gray-600">{{ $ground->capacity }} capacity</span>
-                        </li>
-                    @endif
-                    @if($ground->night_rate_per_hour)
-                        <li class="flex items-start gap-3 text-base">
-                            <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
-                            <span class="text-gray-600">Night lighting available</span>
-                        </li>
-                    @endif
-                    <li class="flex items-start gap-3 text-base">
-                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
-                        <span class="text-gray-600">{{ $ground->total_bookings }}+ successful bookings</span>
-                    </li>
-                    <li class="flex items-start gap-3 text-base">
-                        <i class="fas fa-check-circle text-green-500 mr-0 flex-shrink-0 mt-0.5 text-base"></i>
-                        <span class="text-gray-600">Instant confirmation</span>
-                    </li>
-                </ul>
-            </div>
-    </div>
-
-    <!-- Reviews Section -->
-    <div class="mt-6 sm:mt-8 w-full mx-auto max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16" id="reviews-section">
-        <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <!-- Reviews Section -->
+            <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-4 sm:p-6" id="reviews-section">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <h2 class="text-xl font-bold text-gray-900 flex items-center flex-shrink-0">
                     <i class="fas fa-star text-yellow-400 mr-2"></i> 
@@ -730,7 +764,10 @@
                 </div>
             @endif
             @endguest
+            </div>
         </div>
-    </div>
+        </div>
+        </div>
+
 </div>
 @endsection

@@ -310,7 +310,8 @@
                             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                 <div class="flex-1">
                                     <span class="text-xs text-gray-500">Starting at</span>
-                                    <p class="text-green-600 font-bold text-lg 2xl:text-xl">BTN {{ number_format($ground->rate_per_hour) }} <span class="text-sm font-normal text-gray-500">/ hr</span></p>
+                                    <p class="text-green-600 font-bold text-lg 2xl:text-xl">BTN {{ number_format($ground->rate_per_hour, 0) }} <span class="text-sm font-normal text-gray-500">/ hr</span></p>
+                                    <span class="text-xs text-gray-400">(+3% fee)</span>
                                     @if($ground->total_reviews > 0)
                                         <div class="flex items-center mt-1">
                                             <div class="flex text-yellow-400 text-xs">

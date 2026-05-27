@@ -131,6 +131,41 @@
                     @enderror
                 </div>
 
+                <!-- Bank Account Details -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bank text-green-600 mr-2"></i> Bank Account Details (For Payment Transfers)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bank Name</label>
+                            <input type="text" name="bank_name" value="{{ old('bank_name') }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                   placeholder="e.g., Bhutan National Bank (BNB)">
+                            <p class="mt-1 text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> Bank name where customers will transfer payment</p>
+                            @error('bank_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
+                            <input type="text" name="account_number" value="{{ old('account_number') }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                   placeholder="e.g., 1234567890">
+                            <p class="mt-1 text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> Your bank account number for payment transfers</p>
+                            @error('account_number')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="bg-blue-100 border border-blue-300 rounded p-2 mt-3">
+                        <p class="text-xs text-blue-800">
+                            <i class="fas fa-shield-alt mr-1"></i> This information will only be displayed to customers on the payment page before they make a transfer.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="flex justify-end">
                     <button type="button" onclick="nextStep(2)" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 font-semibold">
                         Next Step <i class="fas fa-arrow-right ml-2"></i>
@@ -219,35 +254,18 @@
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4 4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="flex text-sm text-gray-600">
-                                <label for="images" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                    <span>Upload photos</span>
-                                    <input id="images" name="images[]" type="file" class="sr-only" multiple accept="image/*">
-                                </label>
-                                <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB each (max 4 photos)</p>
+                            <div class="flex-1 h-0.5 bg-gray-300 transition duration-500 ease-in-out" id="line3"></div>
+                            <div class="flex items-center text-gray-500 relative">
+                                <div class="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 border-gray-300 flex items-center justify-center font-bold step-circle" id="step4-circle">4</div>
+                                <div class="absolute top-0 -ml-10 text-center mt-16 w-32 text-xs font-medium uppercase" id="step4-label">Details</div>
+                            </div>
                         </div>
                     </div>
-                    <div id="image-preview" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-                    @error('images.*')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
-                <div class="flex justify-between">
-                    <button type="button" onclick="previousStep(2)" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 font-semibold">
-                        <i class="fas fa-arrow-left mr-2"></i> Previous
-                    </button>
-                    <button type="button" onclick="nextStep(4)" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 font-semibold">
-                        Next Step <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 4: Additional Details -->
+                <!-- Step 1: Basic Information -->
+                <div class="space-y-4" id="step1">
             <div class="space-y-4 hidden" id="step4">
                 <!-- Capacity Section -->
                 <div class="bg-gray-50 rounded-lg p-4 space-y-4">

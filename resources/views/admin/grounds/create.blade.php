@@ -7,35 +7,67 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Create New Ground</h1>
         
-        @if($owners->isEmpty())
-            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-                <p class="text-yellow-800">
-                    <i class="fas fa-exclamation-triangle"></i> 
-                    No approved owners found. Please <a href="{{ route('admin.users.create') }}" class="text-indigo-600 underline">create an owner</a> first.
-                </p>
-            </div>
-        @endif
-
         <form action="{{ route('admin.grounds.store') }}" method="POST">
             @csrf
             
             <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Owner *</label>
-                        <select name="owner_id" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select owner</option>
-                            @foreach($owners as $owner)
-                                <option value="{{ $owner->id }}" {{ old('owner_id') == $owner->id ? 'selected' : '' }}>
-                                    {{ $owner->name }} ({{ $owner->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('owner_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                <!-- Owner Account Creation Section -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                        <i class="fas fa-user-plus text-blue-600 mr-2"></i> Create New Owner Account
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Owner Name *</label>
+                            <input type="text" name="owner_name" value="{{ old('owner_name') }}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="e.g., John Doe">
+                            @error('owner_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Owner Email *</label>
+                            <input type="email" name="owner_email" value="{{ old('owner_email') }}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="e.g., owner@example.com">
+                            @error('owner_email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Owner Password *</label>
+                            <input type="password" name="owner_password" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Set a secure password">
+                            @error('owner_password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-gray-600"><i class="fas fa-info-circle mr-1"></i> Password will be sent to owner via email</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
+                            <input type="password" name="owner_password_confirmation" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Confirm password">
+                            @error('owner_password_confirmation')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
+
+                    <div class="bg-green-100 border border-green-300 rounded p-3 mt-4">
+                        <p class="text-xs text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i> A welcome email with login credentials will be sent to the owner automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Sport Type *</label>
@@ -119,6 +151,41 @@
                     </div>
                 </div>
 
+                <!-- Bank Account Details -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bank text-green-600 mr-2"></i> Bank Account Details (For Payment Transfers)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bank Name</label>
+                            <input type="text" name="bank_name" value="{{ old('bank_name') }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                   placeholder="e.g., Bhutan National Bank (BNB)">
+                            <p class="mt-1 text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> Bank name where customers will transfer payment</p>
+                            @error('bank_name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
+                            <input type="text" name="account_number" value="{{ old('account_number') }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                   placeholder="e.g., 1234567890">
+                            <p class="mt-1 text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> Owner's bank account number for payment transfers</p>
+                            @error('account_number')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="bg-blue-100 border border-blue-300 rounded p-2 mt-3">
+                        <p class="text-xs text-blue-800">
+                            <i class="fas fa-shield-alt mr-1"></i> This information will only be displayed to customers on the payment page before they make a transfer.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="flex items-center">
                     <input type="checkbox" name="is_active" id="is_active" value="1" checked
                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
@@ -137,8 +204,7 @@
             </div>
 
             <div class="mt-6 flex space-x-4">
-                <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 font-semibold"
-                        {{ $owners->isEmpty() ? 'disabled' : '' }}>
+                <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 font-semibold">
                     <i class="fas fa-plus"></i> Create Ground
                 </button>
                 <a href="{{ route('admin.grounds.index') }}" 

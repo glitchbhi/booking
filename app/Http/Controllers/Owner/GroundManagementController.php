@@ -40,6 +40,8 @@ class GroundManagementController extends Controller
             'location' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
             'phone' => 'required|string|max:20',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:50',
             'rate_per_hour' => 'required|numeric|min:0',
             'night_rate_per_hour' => 'nullable|numeric|min:0',
             'capacity' => 'required|string|max:50',
@@ -111,6 +113,8 @@ class GroundManagementController extends Controller
             'location' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
             'phone' => 'required|string|max:20',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:50',
             'rate_per_hour' => 'required|numeric|min:0',
             'night_rate_per_hour' => 'nullable|numeric|min:0',
             'capacity' => 'required|string|max:50',
@@ -239,18 +243,52 @@ class GroundManagementController extends Controller
         $this->authorize('update', $ground);
 
         $validated = $request->validate([
-            'maintenance_start_date' => 'required|date_format:Y-m-d H:i|after:now',
-            'maintenance_end_date' => 'nullable|date_format:Y-m-d H:i|after:maintenance_start_date',
+            'maintenance_action' => 'nullable|in:start,start-now,end',
+            'maintenance_start_date' => 'required_if:maintenance_action,start|nullable|date|after:now',
+            'maintenance_end_date' => 'nullable|date|after:maintenance_start_date',
             'maintenance_reason' => 'nullable|string|max:500',
         ]);
 
         try {
-            $ground->update([
-                'is_under_maintenance' => true,
-                'maintenance_start_date' => $validated['maintenance_start_date'],
-                'maintenance_end_date' => $validated['maintenance_end_date'],
-                'maintenance_reason' => $validated['maintenance_reason'] ?? null,
-            ]);
+            $action = $validated['maintenance_action'] ?? 'start';
+            
+            if ($action === 'end') {
+                // End maintenance immediately (Available Now)
+                $ground->update([
+                    'is_under_maintenance' => false,
+                    'maintenance_start_date' => null,
+                    'maintenance_end_date' => null,
+                    'maintenance_reason' => null,
+                ]);
+
+                $message = 'Ground is now available for bookings';
+                $isMaintenance = false;
+            } elseif ($action === 'start-now') {
+                // Mark as under maintenance immediately (no specific end date)
+                $ground->update([
+                    'is_under_maintenance' => true,
+                    'maintenance_start_date' => now(),
+                    'maintenance_end_date' => null,
+                    'maintenance_reason' => $validated['maintenance_reason'] ?? null,
+                ]);
+
+                $message = 'Ground marked as under maintenance';
+                $isMaintenance = true;
+            } else {
+                // Schedule maintenance with specific dates
+                $startDate = $validated['maintenance_start_date'];
+                $endDate = $validated['maintenance_end_date'];
+                
+                $ground->update([
+                    'is_under_maintenance' => true,
+                    'maintenance_start_date' => $startDate,
+                    'maintenance_end_date' => $endDate,
+                    'maintenance_reason' => $validated['maintenance_reason'] ?? null,
+                ]);
+
+                $message = 'Maintenance scheduled successfully.' . ($ground->maintenance_end_date ? ' Ground will be automatically available on ' . $ground->maintenance_end_date->format('M d, Y h:i A') : '');
+                $isMaintenance = true;
+            }
 
             // Notify admins
             $admins = User::where('role', 'admin')->get();
@@ -258,16 +296,16 @@ class GroundManagementController extends Controller
                 $admin->notify(new GroundMaintenanceStatusChanged(
                     $ground,
                     Auth::user(),
-                    true
+                    $isMaintenance
                 ));
             }
 
             return redirect()
                 ->route('owner.grounds.show', $ground)
-                ->with('success', 'Maintenance scheduled successfully.' . ($ground->maintenance_end_date ? ' Ground will be automatically available on ' . $ground->maintenance_end_date->format('M d, Y h:i A') : ''));
+                ->with('success', $message);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to schedule maintenance: ' . $e->getMessage());
+            return back()->with('error', 'Failed to update maintenance status: ' . $e->getMessage());
         }
     }
 

@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{ground}', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::get('/bookings/{booking}/download', [BookingController::class, 'downloadPDF'])->name('bookings.download');
+    Route::post('/bookings/{booking}/upload-payment', [BookingController::class, 'uploadPayment'])->name('bookings.upload-payment');
     Route::put('/bookings/{booking}/payment-proof', [BookingController::class, 'updatePaymentProof'])->name('bookings.payment-proof.update');
     Route::get('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'destroy'])->name('bookings.destroy');
@@ -111,6 +112,8 @@ Route::middleware(['auth', 'owner'])->prefix('owner')->name('owner.')->group(fun
     Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create', [OwnerBookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [OwnerBookingController::class, 'store'])->name('bookings.store');
+    Route::post('/bookings/{booking}/approve', [OwnerBookingController::class, 'approve'])->name('bookings.approve');
+    Route::post('/bookings/{booking}/reject', [OwnerBookingController::class, 'reject'])->name('bookings.reject');
 });
 
 // Admin routes
@@ -144,6 +147,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/grounds/create', [AdminGroundManagementController::class, 'create'])->name('grounds.create');
     Route::post('/grounds', [AdminGroundManagementController::class, 'store'])->name('grounds.store');
     Route::get('/grounds/{ground}', [AdminGroundManagementController::class, 'show'])->name('grounds.show');
+    Route::get('/grounds/{ground}/edit', [AdminGroundManagementController::class, 'edit'])->name('grounds.edit');
+    Route::put('/grounds/{ground}', [AdminGroundManagementController::class, 'update'])->name('grounds.update');
     Route::post('/grounds/{ground}/toggle', [AdminGroundManagementController::class, 'toggleStatus'])->name('grounds.toggle');
     Route::post('/grounds/{ground}/toggle-maintenance', [AdminGroundManagementController::class, 'toggleMaintenance'])->name('grounds.toggle-maintenance');
     Route::post('/grounds/{ground}/schedule-maintenance', [AdminGroundManagementController::class, 'scheduleMaintenance'])->name('grounds.schedule-maintenance');

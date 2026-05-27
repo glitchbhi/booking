@@ -8,6 +8,7 @@ use App\Models\SportsType;
 use App\Models\User;
 use App\Notifications\GroundMaintenanceStatusChanged;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class GroundManagementController extends Controller
 {
@@ -50,6 +51,80 @@ class GroundManagementController extends Controller
         return view('admin.grounds.show', compact('ground'));
     }
 
+    public function edit(Ground $ground)
+    {
+        $this->authorize('update', $ground);
+        
+        $sportsTypes = SportsType::active()->get();
+        return view('admin.grounds.edit', compact('ground', 'sportsTypes'));
+    }
+
+    public function update(Request $request, Ground $ground)
+    {
+        $this->authorize('update', $ground);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'sport_type_id' => 'required|exists:sports_types,id',
+            'description' => 'nullable|string',
+            'location' => 'required|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'phone' => 'required|string|max:20',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:50',
+            'rate_per_hour' => 'required|numeric|min:0',
+            'night_rate_per_hour' => 'nullable|numeric|min:0',
+            'capacity' => 'required|string|max:50',
+            'capacity_description' => 'nullable|string|max:255',
+            'day_rate_start' => 'nullable|date_format:H:i',
+            'day_rate_end' => 'nullable|date_format:H:i',
+            'night_rate_start' => 'nullable|date_format:H:i',
+            'night_rate_end' => 'nullable|date_format:H:i',
+            'is_active' => 'boolean',
+            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+            'remove_images' => 'nullable|array',
+        ]);
+
+        try {
+            // Handle image removal
+            $currentImages = $ground->images ?? [];
+            if ($request->has('remove_images')) {
+                foreach ($request->remove_images as $index) {
+                    if (isset($currentImages[$index])) {
+                        Storage::disk('public')->delete($currentImages[$index]);
+                        unset($currentImages[$index]);
+                    }
+                }
+                $currentImages = array_values($currentImages); // Re-index
+            }
+
+            // Handle new image uploads
+            if ($request->hasFile('images')) {
+                $remainingSlots = 4 - count($currentImages);
+                $newImages = array_slice($request->file('images'), 0, $remainingSlots);
+                
+                foreach ($newImages as $image) {
+                    if (count($currentImages) < 4) {
+                        $path = $image->store('grounds', 'public');
+                        $currentImages[] = $path;
+                    }
+                }
+            }
+
+            $validated['images'] = $currentImages;
+            unset($validated['remove_images']);
+            
+            $ground->update($validated);
+
+            return redirect()
+                ->route('admin.grounds.show', $ground)
+                ->with('success', 'Ground updated successfully!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to update ground: ' . $e->getMessage());
+        }
+    }
+
     public function toggleStatus(Ground $ground)
     {
         $ground->update([
@@ -74,36 +149,49 @@ class GroundManagementController extends Controller
 
     public function create()
     {
-        $owners = User::where('role', 'owner')
-            ->where('owner_status', 'approved')
-            ->orderBy('name')
-            ->get();
         $sportsTypes = SportsType::active()->get();
 
-        return view('admin.grounds.create', compact('owners', 'sportsTypes'));
+        return view('admin.grounds.create', compact('sportsTypes'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'owner_id' => 'required|exists:users,id',
+            'owner_name' => 'required|string|max:255',
+            'owner_email' => 'required|email|max:255|unique:users,email',
+            'owner_password' => 'required|string|min:8|confirmed',
             'sport_type_id' => 'required|exists:sports_types,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
             'location' => 'required|string|max:255',
             'address' => 'required|string|max:500',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:50',
             'rate_per_hour' => 'required|numeric|min:0',
             'rate_per_hour_night' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
+        // Create new owner account
+        $owner = User::create([
+            'name' => $validated['owner_name'],
+            'email' => $validated['owner_email'],
+            'password' => bcrypt($validated['owner_password']),
+            'role' => 'owner',
+            'owner_status' => 'approved',
+            'email_verified_at' => now(),
+        ]);
+
+        // Create ground with the new owner
         $ground = Ground::create([
-            'owner_id' => $validated['owner_id'],
+            'owner_id' => $owner->id,
             'sport_type_id' => $validated['sport_type_id'],
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'location' => $validated['location'],
             'address' => $validated['address'],
+            'bank_name' => $validated['bank_name'] ?? null,
+            'account_number' => $validated['account_number'] ?? null,
             'rate_per_hour' => $validated['rate_per_hour'],
             'is_active' => $request->boolean('is_active', true),
         ]);
@@ -119,9 +207,17 @@ class GroundManagementController extends Controller
             ]);
         }
 
+        // Send welcome email to owner with credentials
+        $owner->notify(new \App\Notifications\OwnerAccountCreated(
+            $owner,
+            $validated['owner_email'],
+            $validated['owner_password'],
+            $ground
+        ));
+
         return redirect()
             ->route('admin.grounds.show', $ground)
-            ->with('success', 'Ground created successfully!');
+            ->with('success', 'Ground created successfully and owner account created! Welcome email sent to ' . $owner->email);
     }
 
     public function toggleMaintenance(Ground $ground)
@@ -149,8 +245,8 @@ class GroundManagementController extends Controller
     public function scheduleMaintenance(Request $request, Ground $ground)
     {
         $validated = $request->validate([
-            'maintenance_action' => 'required|in:start,end',
-            'maintenance_start_date' => 'required_if:maintenance_action,start|date|after_or_equal:now',
+            'maintenance_action' => 'required|in:start,start-now,end',
+            'maintenance_start_date' => 'required_if:maintenance_action,start|nullable|date|after_or_equal:now',
             'maintenance_end_date' => 'nullable|date|after:maintenance_start_date',
             'maintenance_reason' => 'nullable|string|max:500',
         ]);
@@ -158,7 +254,7 @@ class GroundManagementController extends Controller
         $action = $validated['maintenance_action'];
 
         if ($action === 'end') {
-            // End maintenance immediately
+            // End maintenance immediately (Available Now)
             $ground->update([
                 'is_under_maintenance' => false,
                 'maintenance_start_date' => null,
@@ -169,8 +265,20 @@ class GroundManagementController extends Controller
             $message = 'Ground is now available for bookings';
             $notifyOwner = true;
             $isMaintenance = false;
+        } elseif ($action === 'start-now') {
+            // Mark as under maintenance immediately (no specific end date)
+            $ground->update([
+                'is_under_maintenance' => true,
+                'maintenance_start_date' => now(),
+                'maintenance_end_date' => null,
+                'maintenance_reason' => $validated['maintenance_reason'] ?? null,
+            ]);
+
+            $message = 'Ground marked as under maintenance';
+            $notifyOwner = true;
+            $isMaintenance = true;
         } else {
-            // Start or schedule maintenance
+            // Start or schedule maintenance with specific dates
             $updateData = [
                 'is_under_maintenance' => true,
                 'maintenance_start_date' => $validated['maintenance_start_date'],

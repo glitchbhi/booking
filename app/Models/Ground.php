@@ -20,6 +20,8 @@ class Ground extends Model
         'location',
         'address',
         'phone',
+        'bank_name',
+        'account_number',
         'latitude',
         'longitude',
         'rate_per_hour',

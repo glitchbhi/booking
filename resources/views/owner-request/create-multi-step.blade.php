@@ -270,6 +270,30 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bank Name *</label>
+                        <input type="text" name="bank_name" id="bank_name" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                               placeholder="e.g., Bhutan National Bank (BNB)"
+                               value="{{ old('bank_name') }}">
+                        <p class="mt-1 text-sm text-gray-500">Name of your bank for payment transfers</p>
+                        @error('bank_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Account Number *</label>
+                        <input type="text" name="account_number" id="account_number" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                               placeholder="e.g., 1234567890"
+                               value="{{ old('account_number') }}">
+                        <p class="mt-1 text-sm text-gray-500">Your bank account number where customers will transfer payment</p>
+                        @error('account_number')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Operating Hours / Availability *</label>
                         <div class="grid grid-cols-2 gap-3">
                             <div>

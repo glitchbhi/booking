@@ -18,6 +18,9 @@ class Kernel extends ConsoleKernel
         // Release expired locks every 5 minutes
         $schedule->command('bookings:release-locks')->everyFiveMinutes();
 
+        // Expire pending bookings every minute
+        $schedule->command('bookings:expire-pending')->everyMinute();
+
         // Remove expired suspensions every hour
         $schedule->command('users:remove-suspensions')->hourly();
 

@@ -55,7 +55,7 @@
     </div>
 
     @if($grounds->count() > 0)
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -102,6 +102,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <a href="{{ route('admin.grounds.show', $ground) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">
                                     <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{{ route('admin.grounds.edit', $ground) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                    <i class="fas fa-edit"></i> Edit
                                 </a>
                                 <form action="{{ route('admin.grounds.toggle', $ground) }}" method="POST" class="inline">
                                     @csrf

@@ -24,9 +24,12 @@
                 <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Ground Information</h2>
                 <div class="space-y-1 sm:space-y-2">
                     <p class="text-xs sm:text-sm text-gray-600"><strong>Owner:</strong> {{ $ground->owner->name }} ({{ $ground->owner->email }})</p>
+                    @if($ground->owner->phone)
+                        <p class="text-xs sm:text-sm text-gray-600"><strong>Owner Phone:</strong> {{ $ground->owner->phone }}</p>
+                    @endif
                     <p class="text-xs sm:text-sm text-gray-600"><strong>Sport:</strong> {{ $ground->sportType->name }}</p>
                     <p class="text-xs sm:text-sm text-gray-600"><strong>Location:</strong> {{ $ground->location }}</p>
-                    <p class="text-xs sm:text-sm text-gray-600"><strong>Rate:</strong> BTN {{ number_format($ground->rate_per_hour, 2) }} per hour</p>
+                    <p class="text-xs sm:text-sm text-gray-600"><strong>Rate:</strong> BTN {{ number_format($ground->rate_per_hour, 2) }} per hour <span class="text-gray-500">(includes 3% admin commission)</span></p>
                     <p class="text-xs sm:text-sm text-gray-600"><strong>Status:</strong> 
                         <span class="px-2 py-1 text-xs rounded-full {{ $ground->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             {{ $ground->is_active ? 'Active' : 'Inactive' }}
@@ -51,7 +54,29 @@
             </div>
         </div>
 
+        <!-- Bank Account Details Section -->
+        @if($ground->bank_name || $ground->account_number)
+            <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+                    <i class="fas fa-bank text-green-600 mr-2"></i> Bank Account Details
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <p class="text-xs sm:text-sm text-gray-600">
+                        <strong>Bank Name:</strong> {{ $ground->bank_name ?? 'Not set' }}
+                    </p>
+                    <p class="text-xs sm:text-sm text-gray-600">
+                        <strong>Account Number:</strong> <span class="font-mono">{{ $ground->account_number ?? 'Not set' }}</span>
+                    </p>
+                </div>
+            </div>
+        @endif
+
         <div class="flex flex-wrap gap-2 sm:gap-4">
+            <a href="{{ route('admin.grounds.edit', $ground) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-md text-xs sm:text-sm">
+                <i class="fas fa-edit text-xs sm:text-sm"></i> 
+                <span class="hidden sm:inline">Edit Ground</span>
+                <span class="sm:hidden">Edit</span>
+            </a>
             <form action="{{ route('admin.grounds.toggle', $ground) }}" method="POST" class="inline">
                 @csrf
                 <button type="submit" class="{{ $ground->is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} text-white px-3 sm:px-4 md:px-6 py-2 rounded-md text-xs sm:text-sm">
@@ -116,7 +141,7 @@
     </div>
 
     <!-- Include Maintenance Modal -->
-    @include('components.maintenance-modal', ['ground' => $ground])
+    @include('components.maintenance-modal', ['ground' => $ground, 'routeName' => 'admin.grounds.schedule-maintenance'])
     </div>
 </div>
 @endsection

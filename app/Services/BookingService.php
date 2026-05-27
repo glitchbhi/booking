@@ -26,7 +26,7 @@ class BookingService
         // A booking conflicts only if: new_start < existing_end AND new_end > existing_start
         // This allows back-to-back bookings (no overlap at exact boundaries)
         $conflictingBookings = Booking::where('ground_id', $ground->id)
-            ->whereIn('status', ['booked', 'ongoing'])
+            ->whereIn('status', ['booked', 'ongoing', 'pending', 'payment_submitted', 'waiting_approval'])
             ->where(function ($query) use ($startTime, $endTime) {
                 $query->where(function ($q) use ($startTime, $endTime) {
                     $q->where('start_time', '<', $endTime)
@@ -149,6 +149,18 @@ class BookingService
             
             $effectiveRate = $durationHours > 0 ? $totalAmount / $durationHours : $ground->rate_per_hour;
 
+            // Set initial status based on booking type
+            $initialStatus = ($bookingType === 'online') ? 'pending' : 'booked';
+
+            // Validate online booking requirements
+            if ($bookingType === 'online') {
+                // Online bookings must always start as pending and require payment proof
+                $initialStatus = 'pending';
+                if ($paymentProofPath) {
+                    $initialStatus = 'payment_submitted';
+                }
+            }
+
             // Create booking
             $booking = Booking::create([
                 'user_id' => $user->id,
@@ -158,30 +170,40 @@ class BookingService
                 'duration_hours' => $durationHours,
                 'rate_per_hour' => $ground->rate_per_hour,
                 'total_amount' => $totalAmount,
-                'status' => 'booked',
+                'status' => $initialStatus,
                 'booking_type' => $bookingType,
                 'payment_proof' => $paymentProofPath,
             ]);
 
-            // Increment ground booking count
-            $ground->incrementBookingCount();
+            // Set expiry time for online bookings (10 minutes)
+            if ($bookingType === 'online') {
+                $booking->expires_at = now()->addMinutes(10);
+                $booking->save();
+            }
 
-            // Send notifications after transaction completes (non-blocking, after response)
-            dispatch(function () use ($user, $ground, $booking) {
-                try {
-                    $user->notify(new BookingConfirmation($booking));
-                } catch (\Exception $e) {
-                    \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
-                }
-            })->afterResponse();
+            // Increment ground booking count only for confirmed bookings
+            if ($initialStatus === 'booked') {
+                $ground->incrementBookingCount();
+            }
 
-            dispatch(function () use ($ground, $booking) {
-                try {
-                    $ground->owner->notify(new NewBookingForOwner($booking));
-                } catch (\Exception $e) {
-                    \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
-                }
-            })->afterResponse();
+            // Send notifications only for confirmed bookings
+            if ($initialStatus === 'booked') {
+                dispatch(function () use ($user, $ground, $booking) {
+                    try {
+                        $user->notify(new BookingConfirmation($booking));
+                    } catch (\Exception $e) {
+                        \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
+                    }
+                })->afterResponse();
+
+                dispatch(function () use ($ground, $booking) {
+                    try {
+                        $ground->owner->notify(new NewBookingForOwner($booking));
+                    } catch (\Exception $e) {
+                        \Log::warning('Owner booking notification email failed: ' . $e->getMessage());
+                    }
+                })->afterResponse();
+            }
 
             return $booking;
         });
@@ -364,5 +386,34 @@ class BookingService
     {
         $parts = explode(':', $time);
         return (int)$parts[0] * 60 + (int)($parts[1] ?? 0);
+    }
+
+    /**
+     * Get availability message for conflicting bookings
+     */
+    protected function getAvailabilityMessage(Ground $ground, Carbon $startTime, Carbon $endTime): string
+    {
+        // Check for maintenance conflicts first
+        if ($ground->is_under_maintenance) {
+            return 'This ground is currently under maintenance and not available for booking.';
+        }
+
+        if ($ground->maintenance_start_date && $ground->maintenance_end_date) {
+            $maintenanceStart = $ground->maintenance_start_date;
+            $maintenanceEnd = $ground->maintenance_end_date;
+            
+            if ($startTime->lt($maintenanceEnd) && $endTime->gt($maintenanceStart)) {
+                return "This ground is under maintenance from {$maintenanceStart->format('M d, Y h:i A')} to {$maintenanceEnd->format('M d, Y h:i A')}. Please choose a different time.";
+            }
+        }
+
+        if ($ground->maintenance_start_date && !$ground->maintenance_end_date) {
+            $maintenanceStart = $ground->maintenance_start_date;
+            if ($startTime->gte($maintenanceStart)) {
+                return "This ground is under maintenance starting {$maintenanceStart->format('M d, Y h:i A')} and is not available for booking.";
+            }
+        }
+
+        return 'This time slot is already booked. Please choose a different time.';
     }
 }

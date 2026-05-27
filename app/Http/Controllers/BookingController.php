@@ -29,7 +29,7 @@ class BookingController extends Controller
         $this->authorize('create', Booking::class);
 
         $validated = $request->validate([
-            'start_time' => 'required|date|after_or_equal:now',
+            'start_time' => 'required|date|after_or_equal:now|before_or_equal:' . Carbon::now()->addDays(30)->format('Y-m-d H:i:s'),
             'duration_hours' => 'required|numeric|min:1|max:168',
             'duration_unit' => 'required|in:hours,days',
             'notes' => 'nullable|string|max:500',
@@ -37,7 +37,8 @@ class BookingController extends Controller
         ], [
             'duration_hours.min' => 'Minimum booking duration is 1 hour.',
             'duration_hours.required' => 'Please select a booking duration.',
-            'start_time.after_or_equal' => 'Booking time must be in the future.',
+            'start_time.after_or_equal' => 'Booking must be for today or later.',
+            'start_time.before_or_equal' => 'Bookings can only be made up to 30 days in advance.',
             'payment_proof.image' => 'Payment proof must be an image.',
             'payment_proof.max' => 'Payment proof image must not exceed 2MB.',
         ]);
@@ -69,9 +70,12 @@ class BookingController extends Controller
                 $paymentProofPath
             );
 
+            // Mark as pending with 10-minute expiry
+            $booking->markAsPending();
+
             return redirect()
                 ->route('bookings.show', $booking)
-                ->with('success', 'Booking created successfully!');
+                ->with('success', 'Booking created! Please upload payment proof within 10 minutes.');
 
         } catch (\Exception $e) {
             return back()
@@ -261,5 +265,61 @@ class BookingController extends Controller
             'is_under_maintenance' => $ground->is_under_maintenance,
             'remaining_time' => $ground->getMaintenanceRemainingTime()
         ];
+    }
+
+    /**
+     * Handle payment proof upload
+     */
+    public function uploadPayment(Request $request, Booking $booking)
+    {
+        $this->authorize('uploadPaymentProof', $booking);
+
+        // Check if booking is in pending status and not expired
+        if (!$booking->canUploadPayment()) {
+            return back()->with('error', 'Payment upload is no longer available for this booking.');
+        }
+
+        $validated = $request->validate([
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ], [
+            'payment_proof.required' => 'Please upload a payment screenshot.',
+            'payment_proof.image' => 'Payment proof must be an image file.',
+            'payment_proof.max' => 'Payment proof image must not exceed 5MB.',
+        ]);
+
+        try {
+            // Upload payment proof
+            $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+            
+            // Update booking with payment proof
+            $booking->uploadPaymentProof($paymentProofPath);
+            
+            // Mark as waiting for approval
+            $booking->markAsWaitingApproval();
+            
+            // Send email notification to ground owner
+            $this->notifyOwnerOfPayment($booking);
+
+            return redirect()
+                ->route('bookings.show', $booking)
+                ->with('success', 'Payment proof uploaded successfully! The ground owner will review and approve your booking.');
+
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to upload payment proof: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify ground owner of payment submission
+     */
+    protected function notifyOwnerOfPayment(Booking $booking)
+    {
+        try {
+            $booking->ground->owner->notify(new \App\Notifications\PaymentSubmitted($booking));
+        } catch (\Exception $e) {
+            \Log::warning('Payment submission email failed: ' . $e->getMessage());
+        }
     }
 }

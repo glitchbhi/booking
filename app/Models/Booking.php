@@ -23,6 +23,7 @@ class Booking extends Model
         'status',
         'booking_type',
         'payment_proof',
+        'expires_at',
         'cancellation_reason',
         'cancelled_at',
         'is_no_show',
@@ -34,6 +35,7 @@ class Booking extends Model
         'duration_hours' => 'decimal:2',
         'rate_per_hour' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'expires_at' => 'datetime',
         'cancelled_at' => 'datetime',
         'is_no_show' => 'boolean',
     ];
@@ -124,5 +126,84 @@ class Booking extends Model
     public function canBeReviewed()
     {
         return $this->status === 'completed' && !$this->review;
+    }
+
+    // New payment workflow methods
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isPaymentSubmitted()
+    {
+        return $this->status === 'payment_submitted';
+    }
+
+    public function isWaitingApproval()
+    {
+        return $this->status === 'waiting_approval';
+    }
+
+    public function isExpired()
+    {
+        return $this->status === 'expired';
+    }
+
+    public function isExpiredTime()
+    {
+        return $this->expires_at && now()->isAfter($this->expires_at);
+    }
+
+    public function canUploadPayment()
+    {
+        return $this->status === 'pending' && !$this->isExpiredTime();
+    }
+
+    public function getRemainingTime()
+    {
+        if (!$this->expires_at) return null;
+        
+        $remaining = $this->expires_at->diffInSeconds(now());
+        
+        if ($remaining <= 0) {
+            return 'Expired';
+        }
+        
+        $minutes = floor($remaining / 60);
+        $seconds = $remaining % 60;
+        
+        return "{$minutes}m {$seconds}s";
+    }
+
+    public function markAsPending()
+    {
+        $this->status = 'pending';
+        $this->expires_at = now()->addMinutes(10);
+        $this->save();
+    }
+
+    public function uploadPaymentProof($filePath)
+    {
+        $this->payment_proof = $filePath;
+        $this->status = 'payment_submitted';
+        $this->save();
+    }
+
+    public function markAsWaitingApproval()
+    {
+        $this->status = 'waiting_approval';
+        $this->save();
+    }
+
+    public function confirmBooking()
+    {
+        $this->status = 'booked';
+        $this->save();
+    }
+
+    public function expireBooking()
+    {
+        $this->status = 'expired';
+        $this->save();
     }
 }

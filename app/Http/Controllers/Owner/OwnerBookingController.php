@@ -23,7 +23,8 @@ class OwnerBookingController extends Controller
         $grounds = Auth::user()->grounds()->pluck('id');
         
         $query = Booking::with(['user', 'ground'])
-            ->whereIn('ground_id', $grounds);
+            ->whereIn('ground_id', $grounds)
+            ->whereIn('status', ['payment_submitted', 'waiting_approval', 'booked', 'ongoing', 'completed', 'cancelled']);
 
         // Filters
         if ($request->filled('status')) {
@@ -97,6 +98,98 @@ class OwnerBookingController extends Controller
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Approve a pending booking
+     */
+    public function approve(Booking $booking)
+    {
+        // Verify ownership
+        if ($booking->ground->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Check if booking is waiting for approval
+        if ($booking->status !== 'waiting_approval') {
+            return back()->with('error', 'This booking cannot be approved.');
+        }
+
+        try {
+            // Confirm the booking
+            $booking->confirmBooking();
+            
+            // Increment ground booking count
+            $booking->ground->incrementBookingCount();
+
+            // Send notification to user
+            $this->notifyUserOfApproval($booking);
+
+            return redirect()
+                ->route('owner.bookings.index')
+                ->with('success', 'Booking approved successfully! User has been notified.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to approve booking: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject a pending booking
+     */
+    public function reject(Booking $booking)
+    {
+        // Verify ownership
+        if ($booking->ground->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Check if booking is waiting for approval
+        if ($booking->status !== 'waiting_approval') {
+            return back()->with('error', 'This booking cannot be rejected.');
+        }
+
+        try {
+            // Cancel the booking
+            $booking->status = 'cancelled';
+            $booking->cancellation_reason = 'Payment proof rejected by ground owner';
+            $booking->cancelled_at = now();
+            $booking->save();
+
+            // Send notification to user
+            $this->notifyUserOfRejection($booking);
+
+            return redirect()
+                ->route('owner.bookings.index')
+                ->with('success', 'Booking rejected. User has been notified.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to reject booking: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify user of booking approval
+     */
+    protected function notifyUserOfApproval(Booking $booking)
+    {
+        try {
+            $booking->user->notify(new \App\Notifications\BookingApproved($booking));
+        } catch (\Exception $e) {
+            \Log::warning('Booking approval email failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify user of booking rejection
+     */
+    protected function notifyUserOfRejection(Booking $booking)
+    {
+        try {
+            $booking->user->notify(new \App\Notifications\BookingRejected($booking));
+        } catch (\Exception $e) {
+            \Log::warning('Booking rejection email failed: ' . $e->getMessage());
         }
     }
 }
