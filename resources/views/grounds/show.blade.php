@@ -619,6 +619,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             @guest
                 <div class="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 text-center">

@@ -118,21 +118,21 @@
                             <td class="px-3 py-3 whitespace-nowrap">
                                 @if($booking->status === 'waiting_approval')
                                     <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                                        <form action="{{ route('owner.bookings.approve', $booking) }}" method="POST" class="inline">
+                                        <button type="button" 
+                                                onclick="showConfirmation('Are you sure you want to approve this booking?', () => document.getElementById('approveForm{{ $booking->id }}').submit())"
+                                                class="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-green-700 w-full sm:w-auto">
+                                            <i class="fas fa-check mr-1"></i> Approve
+                                        </button>
+                                        <form id="approveForm{{ $booking->id }}" action="{{ route('owner.bookings.approve', $booking) }}" method="POST" class="hidden">
                                             @csrf
-                                            <button type="submit" 
-                                                    onclick="return confirm('Are you sure you want to approve this booking?')"
-                                                    class="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-green-700 w-full sm:w-auto">
-                                                <i class="fas fa-check mr-1"></i> Approve
-                                            </button>
                                         </form>
-                                        <form action="{{ route('owner.bookings.reject', $booking) }}" method="POST" class="inline">
+                                        <button type="button" 
+                                                onclick="showConfirmation('Are you sure you want to reject this booking?', () => document.getElementById('rejectForm{{ $booking->id }}').submit())"
+                                                class="bg-red-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-red-700 w-full sm:w-auto">
+                                            <i class="fas fa-times mr-1"></i> Reject
+                                        </button>
+                                        <form id="rejectForm{{ $booking->id }}" action="{{ route('owner.bookings.reject', $booking) }}" method="POST" class="hidden">
                                             @csrf
-                                            <button type="submit" 
-                                                    onclick="return confirm('Are you sure you want to reject this booking?')"
-                                                    class="bg-red-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs hover:bg-red-700 w-full sm:w-auto">
-                                                <i class="fas fa-times mr-1"></i> Reject
-                                            </button>
                                         </form>
                                     </div>
                                 @else
@@ -153,6 +153,21 @@
             <p class="text-gray-600 text-lg">No bookings found.</p>
         </div>
     @endif
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="closeConfirmation(event)">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <p id="confirmationMessage" class="text-gray-700 text-center mb-6 text-base"></p>
+        <div class="flex gap-3 justify-center">
+            <button onclick="closeConfirmation()" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-medium">
+                Cancel
+            </button>
+            <button id="confirmButton" onclick="confirmAction()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                OK
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Payment Proof Modal -->
@@ -198,6 +213,37 @@ function closePaymentProof(event) {
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closePaymentProof();
+    }
+});
+
+let confirmationCallback = null;
+
+function showConfirmation(message, callback) {
+    confirmationCallback = callback;
+    document.getElementById('confirmationMessage').textContent = message;
+    document.getElementById('confirmationModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeConfirmation(event) {
+    if (!event || event.target.id === 'confirmationModal' || event.type === 'click') {
+        document.getElementById('confirmationModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        confirmationCallback = null;
+    }
+}
+
+function confirmAction() {
+    if (confirmationCallback) {
+        confirmationCallback();
+    }
+    closeConfirmation();
+}
+
+// Close confirmation modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && !document.getElementById('confirmationModal').classList.contains('hidden')) {
+        closeConfirmation();
     }
 });
 </script>
