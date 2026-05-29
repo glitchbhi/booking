@@ -50,6 +50,9 @@ class GroundManagementController extends Controller
             'day_rate_end' => 'nullable|date_format:H:i',
             'night_rate_start' => 'nullable|date_format:H:i',
             'night_rate_end' => 'nullable|date_format:H:i',
+            'opening_time' => 'required|date_format:H:i',
+            'closing_time' => 'required|date_format:H:i|after:opening_time',
+            'slot_duration' => 'nullable|integer|min:15|max:480',
             'images' => 'nullable|array|max:4',
             'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             'is_active' => 'boolean',
@@ -58,6 +61,7 @@ class GroundManagementController extends Controller
         try {
             $validated['owner_id'] = Auth::id();
             $validated['is_active'] = false; // Manually added grounds require admin approval
+            $validated['slot_duration'] = $validated['slot_duration'] ?? 60; // Default 60 minutes
             
             // Handle image uploads (max 4)
             if ($request->hasFile('images')) {
@@ -123,6 +127,9 @@ class GroundManagementController extends Controller
             'day_rate_end' => 'nullable|date_format:H:i',
             'night_rate_start' => 'nullable|date_format:H:i',
             'night_rate_end' => 'nullable|date_format:H:i',
+            'opening_time' => 'required|date_format:H:i',
+            'closing_time' => 'required|date_format:H:i|after:opening_time',
+            'slot_duration' => 'nullable|integer|min:15|max:480',
             'is_active' => 'boolean',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
@@ -158,11 +165,22 @@ class GroundManagementController extends Controller
             $validated['images'] = $currentImages;
             unset($validated['remove_images']);
             
+            // Track what's changing to provide appropriate feedback
+            $scheduleChanged = $ground->opening_time != $validated['opening_time'] ||
+                             $ground->closing_time != $validated['closing_time'] ||
+                             $ground->slot_duration != ($validated['slot_duration'] ?? 60);
+            
             $ground->update($validated);
+
+            // Provide feedback about slot regeneration
+            $message = 'Ground updated successfully!';
+            if ($scheduleChanged) {
+                $message .= ' Booking slots have been automatically regenerated based on the new schedule.';
+            }
 
             return redirect()
                 ->route('owner.grounds.show', $ground)
-                ->with('success', 'Ground updated successfully!');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to update ground: ' . $e->getMessage());

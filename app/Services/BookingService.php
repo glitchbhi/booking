@@ -278,30 +278,31 @@ class BookingService
 
     /**
      * Get available time slots for a ground on a specific date
+     * Fetches pre-generated slots and filters out booked ones
      */
-    public function getAvailableSlots(Ground $ground, Carbon $date): array
+    public function getAvailableSlots(Ground $ground, $date): array
     {
-        $dayOfWeek = strtolower($date->format('l'));
+        $date = $date instanceof Carbon ? $date : Carbon::parse($date);
         
-        $availabilities = $ground->availabilities()
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_active', true)
-            ->get();
+        // Get all slots for the date from database
+        $slots = $ground->getAvailableSlotsForDate($date);
 
-        if ($availabilities->isEmpty()) {
+        if ($slots->isEmpty()) {
             return [];
         }
 
-        $slots = [];
-        foreach ($availabilities as $availability) {
-            // This is a simplified version - you would generate hourly slots here
-            $slots[] = [
-                'start' => $availability->start_time,
-                'end' => $availability->end_time,
+        // Convert slots to array format for API responses
+        return $slots->map(function ($slot) {
+            return [
+                'id' => $slot->id,
+                'ground_id' => $slot->ground_id,
+                'slot_date' => $slot->slot_date,
+                'start_time' => $slot->start_time->format('H:i'),
+                'end_time' => $slot->end_time->format('H:i'),
+                'display' => $slot->start_time->format('H:i') . ' - ' . $slot->end_time->format('H:i'),
+                'is_available' => $slot->is_available,
             ];
-        }
-
-        return $slots;
+        })->toArray();
     }
 
     /**

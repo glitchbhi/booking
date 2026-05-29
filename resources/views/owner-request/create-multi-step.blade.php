@@ -392,25 +392,36 @@ const totalSteps = 4;
 document.addEventListener('DOMContentLoaded', function() {
     showStep(currentStep);
     
-    // Check if night is available on load
-    if (document.getElementById('available_at_night').checked) {
-        document.getElementById('nightPriceContainer').classList.remove('hidden');
-        document.getElementById('price_night').required = true;
+    // Initialize night price visibility on load
+    const availableAtNightCheckbox = document.getElementById('available_at_night');
+    const nightPriceContainer = document.getElementById('nightPriceContainer');
+    
+    if (availableAtNightCheckbox && nightPriceContainer) {
+        // Call toggleNightPrice to set initial state
+        toggleNightPrice();
+        
+        // Add change event listener
+        availableAtNightCheckbox.addEventListener('change', toggleNightPrice);
     }
     
     // Check if ground size should be shown on load
     toggleGroundSize();
     
     // Update pricing preview on input
-    document.getElementById('day_time_start').addEventListener('change', updatePricingPreview);
-    document.getElementById('price_day').addEventListener('input', updatePricingPreview);
-    document.getElementById('night_time_start').addEventListener('change', updatePricingPreview);
-    document.getElementById('price_night').addEventListener('input', updatePricingPreview);
+    const dayTimeStart = document.getElementById('day_time_start');
+    const priceDay = document.getElementById('price_day');
+    const nightTimeStart = document.getElementById('night_time_start');
+    const priceNight = document.getElementById('price_night');
+    
+    if (dayTimeStart) dayTimeStart.addEventListener('change', updatePricingPreview);
+    if (priceDay) priceDay.addEventListener('input', updatePricingPreview);
+    if (nightTimeStart) nightTimeStart.addEventListener('change', updatePricingPreview);
+    if (priceNight) priceNight.addEventListener('input', updatePricingPreview);
     
     // Add event listeners for auto-fill functionality
-    document.getElementById('day_time_start').addEventListener('change', autoFillOpeningTime);
-    document.getElementById('night_time_start').addEventListener('change', autoFillClosingTime);
-    document.getElementById('available_at_night').addEventListener('change', autoFillClosingTime);
+    if (dayTimeStart) dayTimeStart.addEventListener('change', autoFillOpeningTime);
+    if (nightTimeStart) nightTimeStart.addEventListener('change', autoFillClosingTime);
+    if (availableAtNightCheckbox) availableAtNightCheckbox.addEventListener('change', autoFillClosingTime);
     
     // Initial auto-fill
     autoFillOpeningTime();
@@ -586,26 +597,43 @@ function validateStep(step) {
 }
 
 function toggleNightPrice() {
-    const checkbox = document.getElementById('available_at_night');
-    const container = document.getElementById('nightPriceContainer');
-    const priceNight = document.getElementById('price_night');
-    const nightTimeStart = document.getElementById('night_time_start');
-    
-    if (checkbox.checked) {
-        container.classList.remove('hidden');
-        priceNight.required = true;
-        nightTimeStart.required = true;
-    } else {
-        container.classList.add('hidden');
-        priceNight.required = false;
-        nightTimeStart.required = false;
-        priceNight.value = '';
-        nightTimeStart.value = '18:00';
+    try {
+        const checkbox = document.getElementById('available_at_night');
+        const container = document.getElementById('nightPriceContainer');
+        const priceNight = document.getElementById('price_night');
+        const nightTimeStart = document.getElementById('night_time_start');
+        
+        if (!checkbox || !container || !priceNight || !nightTimeStart) {
+            console.warn('Warning: One or more night price elements not found');
+            return;
+        }
+        
+        console.log('toggleNightPrice:', checkbox.checked ? 'SHOW night pricing' : 'HIDE night pricing');
+        
+        if (checkbox.checked) {
+            // Show night pricing section
+            container.classList.remove('hidden');
+            container.style.display = 'block';
+            priceNight.required = true;
+            nightTimeStart.required = true;
+            console.log('✓ Night pricing section visible');
+        } else {
+            // Hide night pricing section
+            container.classList.add('hidden');
+            container.style.display = 'none';
+            priceNight.required = false;
+            nightTimeStart.required = false;
+            priceNight.value = '';
+            nightTimeStart.value = '18:00';
+            console.log('✓ Night pricing section hidden');
+        }
+        
+        // Auto-fill closing time when night price status changes
+        autoFillClosingTime();
+        updatePricingPreview();
+    } catch (error) {
+        console.error('Error in toggleNightPrice:', error);
     }
-    
-    // Auto-fill closing time when night price status changes
-    autoFillClosingTime();
-    updatePricingPreview();
 }
 
 function updatePricingPreview() {

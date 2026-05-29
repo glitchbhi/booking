@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Review;
 use App\Models\Ground;
+use App\Observers\GroundObserver;
 use App\Policies\ReviewPolicy;
 use App\Policies\GroundPolicy;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+        
+        // Register model observers
+        Ground::observe(GroundObserver::class);
     }
 
     /**

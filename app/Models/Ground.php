@@ -26,6 +26,7 @@ class Ground extends Model
         'longitude',
         'rate_per_hour',
         'night_rate_per_hour',
+        'available_at_night',
         'capacity',
         'team_size',
         'capacity_description',
@@ -33,6 +34,9 @@ class Ground extends Model
         'day_rate_end',
         'night_rate_start',
         'night_rate_end',
+        'opening_time',
+        'closing_time',
+        'slot_duration',
         'images',
         'is_active',
         'is_under_maintenance',
@@ -48,6 +52,7 @@ class Ground extends Model
         'images' => 'array',
         'is_active' => 'boolean',
         'is_under_maintenance' => 'boolean',
+        'available_at_night' => 'boolean',
         'maintenance_start_date' => 'datetime',
         'maintenance_end_date' => 'datetime',
         'rate_per_hour' => 'decimal:2',
@@ -59,6 +64,8 @@ class Ground extends Model
         'day_rate_end' => 'datetime:H:i',
         'night_rate_start' => 'datetime:H:i',
         'night_rate_end' => 'datetime:H:i',
+        'opening_time' => 'datetime:H:i:s',
+        'closing_time' => 'datetime:H:i:s',
     ];
 
     // Relationships
@@ -85,6 +92,11 @@ class Ground extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function slots()
+    {
+        return $this->hasMany(GroundSlot::class);
     }
 
     // Scopes
@@ -213,5 +225,101 @@ class Ground extends Model
     public function incrementBookingCount()
     {
         $this->increment('total_bookings');
+    }
+
+    /**
+     * Get available slots for a specific date
+     */
+    public function getAvailableSlotsForDate($date)
+    {
+        return $this->slots()
+            ->where('slot_date', $date)
+            ->where('is_available', true)
+            ->orderBy('start_time')
+            ->get();
+    }
+
+    /**
+     * Get all slots for a specific date (available and booked)
+     */
+    public function getSlotsForDate($date)
+    {
+        return $this->slots()
+            ->where('slot_date', $date)
+            ->orderBy('start_time')
+            ->get();
+    }
+
+    /**
+     * Get available slots for a date range
+     */
+    public function getAvailableSlotsForDateRange($startDate, $endDate)
+    {
+        return $this->slots()
+            ->whereBetween('slot_date', [$startDate, $endDate])
+            ->where('is_available', true)
+            ->orderBy('slot_date')
+            ->orderBy('start_time')
+            ->get();
+    }
+
+    /**
+     * Check if ground has any available slots for a date
+     */
+    public function hasAvailableSlots($date): bool
+    {
+        return $this->slots()
+            ->where('slot_date', $date)
+            ->where('is_available', true)
+            ->exists();
+    }
+
+    /**
+     * Get the ground's current schedule information
+     * Useful for verifying slot synchronization
+     */
+    public function getScheduleInfo(): array
+    {
+        return [
+            'opening_time' => $this->opening_time,
+            'closing_time' => $this->closing_time,
+            'slot_duration' => $this->slot_duration ?? 60,
+            'day_rate_start' => $this->day_rate_start,
+            'day_rate_end' => $this->day_rate_end,
+            'night_rate_start' => $this->night_rate_start,
+            'night_rate_end' => $this->night_rate_end,
+            'rate_per_hour' => $this->rate_per_hour,
+            'night_rate_per_hour' => $this->night_rate_per_hour,
+            'is_active' => $this->is_active,
+            'is_under_maintenance' => $this->is_under_maintenance,
+            'total_slots' => $this->slots()->count(),
+            'available_slots' => $this->slots()->where('is_available', true)->count(),
+            'booked_slots' => $this->slots()->where('is_available', false)->count(),
+        ];
+    }
+
+    /**
+     * Verify that database and model are synchronized
+     * Returns true if all fields match current database values
+     */
+    public function isSynchronized(): bool
+    {
+        // Reload from database
+        $fresh = self::find($this->id);
+        
+        if (!$fresh) {
+            return false;
+        }
+
+        // Compare key fields
+        return $this->opening_time === $fresh->opening_time &&
+               $this->closing_time === $fresh->closing_time &&
+               $this->slot_duration === $fresh->slot_duration &&
+               $this->rate_per_hour === $fresh->rate_per_hour &&
+               $this->night_rate_per_hour === $fresh->night_rate_per_hour &&
+               $this->day_rate_start === $fresh->day_rate_start &&
+               $this->day_rate_end === $fresh->day_rate_end &&
+               $this->night_rate_start === $fresh->night_rate_start &&
+               $this->night_rate_end === $fresh->night_rate_end;
     }
 }

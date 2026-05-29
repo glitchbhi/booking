@@ -116,21 +116,106 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Night Rate per Hour (BTN)</label>
-                        <input type="number" name="night_rate_per_hour" value="{{ old('night_rate_per_hour', $ground->night_rate_per_hour) }}" min="0" step="0.01"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-                        @error('night_rate_per_hour')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                <!-- Available at Night Option -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" name="available_at_night" id="available_at_night" value="1"
+                               class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                               {{ old('available_at_night', $ground->available_at_night) ? 'checked' : '' }}
+                               onchange="toggleNightPricingAdminEdit()">
+                        <span class="text-sm font-medium text-gray-700">
+                            <i class="fas fa-moon text-purple-600 mr-1"></i> Available at Night
+                        </span>
+                    </label>
+                    <p class="mt-2 ml-8 text-sm text-gray-600"><i class="fas fa-info-circle mr-1"></i> Check this if this ground operates and accepts bookings during night hours (for night rate pricing)</p>
+                </div>
+
+                <!-- Night Time Pricing Section -->
+                <div id="nightPricingAdminEdit" class="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-4 {{ old('available_at_night', $ground->available_at_night) ? '' : 'hidden' }}">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-moon text-purple-600 mr-2"></i> Night Time Pricing
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clock text-purple-500 mr-1"></i> Night Time Starts At
+                            </label>
+                            <input type="time" name="night_rate_start" 
+                                   value="{{ old('night_rate_start', $ground->night_rate_start ? \Carbon\Carbon::parse($ground->night_rate_start)->format('H:i') : '18:00') }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500">
+                            <p class="mt-1 text-xs text-gray-500">When night rate pricing starts (e.g., 6:00 PM)</p>
+                            @error('night_rate_start')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-dollar-sign text-purple-500 mr-1"></i> Price (per hour) *
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500 font-medium">BTN</span>
+                                <input type="number" name="night_rate_per_hour" 
+                                       value="{{ old('night_rate_per_hour', $ground->night_rate_per_hour) }}" 
+                                       min="0" step="0.01"
+                                       class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                                       placeholder="700.00">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">This ground's night time hourly rate</p>
+                            @error('night_rate_per_hour')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-600"><i class="fas fa-info-circle mr-1"></i> Set night time pricing (typically evening onwards)</p>
+                </div>
+
+                <!-- Operating Hours Section -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    <h3 class="font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-building text-blue-600 mr-2"></i> Operating Hours (When Ground is Open for Bookings)
+                    </h3>
+                    <p class="text-xs text-gray-600"><i class="fas fa-info-circle mr-1"></i> These are the ground's actual opening and closing times - when customers can book slots. This is separate from pricing schedule below.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-unlock text-green-500 mr-1"></i> Opening Time *
+                            </label>
+                            <input type="time" name="opening_time" 
+                                   value="{{ old('opening_time', $ground->opening_time ? \Carbon\Carbon::parse($ground->opening_time)->format('H:i') : '06:00') }}"
+                                   required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">When bookings start for the day (e.g., 6:00 AM)</p>
+                            @error('opening_time')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock text-red-500 mr-1"></i> Closing Time *
+                            </label>
+                            <input type="time" name="closing_time" 
+                                   value="{{ old('closing_time', $ground->closing_time ? \Carbon\Carbon::parse($ground->closing_time)->format('H:i') : '22:00') }}"
+                                   required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">When bookings end for the day (e.g., 10:00 PM)</p>
+                            @error('closing_time')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="bg-white border border-blue-200 rounded p-2">
+                        <p class="text-xs text-blue-800">
+                            <i class="fas fa-lightbulb mr-1"></i> <strong>Example:</strong> If the ground opens at 8:00 AM and closes at 10:00 PM, set these times accordingly. Customers will only see available slots between these hours.
+                        </p>
                     </div>
                 </div>
 
                 <!-- Rate Timing Section -->
                 <div class="bg-gray-50 rounded-lg p-4 space-y-4">
                     <h3 class="font-semibold text-gray-800 flex items-center">
-                        <i class="fas fa-clock text-green-500 mr-2"></i> Rate Timing
+                        <i class="fas fa-clock text-green-500 mr-2"></i> Rate Timing (Pricing Schedule)
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-lg p-4 border border-gray-200">
@@ -164,7 +249,7 @@
                             @enderror
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> Day rate applies during day hours, night rate applies during night hours (if set).</p>
+                    <p class="text-xs text-gray-500"><i class="fas fa-info-circle mr-1"></i> <strong>For Pricing Only:</strong> These times determine when different rates apply. Day rate applies during day hours, night rate applies during night hours (if set). Customers can still book during operating hours you set above.</p>
                 </div>
 
                 <!-- Capacity Section -->
@@ -322,10 +407,36 @@
                 </a>
             </div>
         </form>
-    </div>
-</div>
 
-<script>
+        <!-- JavaScript for auto-populate Operating Hours from Rate Timing -->
+        <script>
+            // Auto-populate Operating Hours based on Rate Timing for convenience
+            function updateOperatingHours() {
+                const dayRateStart = document.querySelector('input[name="day_rate_start"]').value;
+                const nightRateEnd = document.querySelector('input[name="night_rate_end"]').value;
+                const openingTimeField = document.querySelector('input[name="opening_time"]');
+                const closingTimeField = document.querySelector('input[name="closing_time"]');
+
+                // If day rate start is set, use it as opening time (user can override)
+                if (dayRateStart && !openingTimeField.value) {
+                    openingTimeField.value = dayRateStart;
+                }
+
+                // If night rate end is set, use it as closing time (user can override)
+                if (nightRateEnd && !closingTimeField.value) {
+                    closingTimeField.value = nightRateEnd;
+                }
+            }
+
+            // Listen for changes to rate timing fields
+            document.querySelector('input[name="day_rate_start"]').addEventListener('change', updateOperatingHours);
+            document.querySelector('input[name="night_rate_end"]').addEventListener('change', updateOperatingHours);
+
+            // Run on page load in case values exist
+            document.addEventListener('DOMContentLoaded', updateOperatingHours);
+        </script>
+
+    <script>
 document.getElementById('images').addEventListener('change', function(e) {
     const preview = document.getElementById('image-preview');
     preview.innerHTML = '';
@@ -340,6 +451,30 @@ document.getElementById('images').addEventListener('change', function(e) {
         };
         reader.readAsDataURL(file);
     }
+});
+
+// Toggle Night Pricing Section
+function toggleNightPricingAdminEdit() {
+    const checkbox = document.getElementById('available_at_night');
+    const container = document.getElementById('nightPricingAdminEdit');
+    
+    if (!checkbox || !container) {
+        console.warn('Warning: Night pricing elements not found');
+        return;
+    }
+    
+    if (checkbox.checked) {
+        container.classList.remove('hidden');
+        container.style.display = 'block';
+    } else {
+        container.classList.add('hidden');
+        container.style.display = 'none';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleNightPricingAdminEdit();
 });
 </script>
 @endsection

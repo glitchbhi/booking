@@ -6,6 +6,14 @@
         ? array_slice($ground->images, 0, 4) 
         : [];
     $hasImages = count($groundImages) > 0;
+    
+    // Format opening and closing times
+    $openingTime = $ground->opening_time ? \Carbon\Carbon::parse($ground->opening_time)->format('H:i') : 'N/A';
+    $closingTime = $ground->closing_time ? \Carbon\Carbon::parse($ground->closing_time)->format('H:i') : 'N/A';
+    
+    // Check availability for today
+    $today = \Carbon\Carbon::today();
+    $hasAvailableSlots = $ground->hasAvailableSlots($today->toDateString());
 @endphp
 
 <a href="{{ route('grounds.show', $ground) }}" class="block bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer w-full">
@@ -35,6 +43,21 @@
             </div>
         @endif
         
+        <!-- Availability Badge -->
+        <div class="absolute top-1 sm:top-2 left-1 sm:left-2 flex items-center gap-2 z-10">
+            @if($hasAvailableSlots)
+                <div class="bg-green-500/90 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1">
+                    <i class="fas fa-check-circle text-xs sm:text-sm"></i>
+                    <span class="hidden sm:inline">Available</span>
+                </div>
+            @else
+                <div class="bg-red-500/90 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1">
+                    <i class="fas fa-times-circle text-xs sm:text-sm"></i>
+                    <span class="hidden sm:inline">No Slots</span>
+                </div>
+            @endif
+        </div>
+        
         <!-- Rating Badge -->
         <div class="absolute top-1 sm:top-2 right-1 sm:right-2 bg-white/90 backdrop-blur-sm px-1.5 sm:px-2 py-1 rounded-lg text-xs sm:text-sm font-semibold flex items-center shadow-lg z-10">
             <i class="fas fa-star text-yellow-400 mr-0.5 sm:mr-1 text-xs sm:text-sm"></i>
@@ -50,6 +73,14 @@
             <span class="line-clamp-1">{{ $ground->location }}</span>
         </div>
         
+        <!-- Opening/Closing Times -->
+        <div class="flex items-center text-xs sm:text-sm text-gray-600 mt-2 gap-3">
+            <div class="flex items-center gap-1">
+                <i class="fas fa-clock text-blue-500 text-xs"></i>
+                <span>{{ $openingTime }} - {{ $closingTime }}</span>
+            </div>
+        </div>
+        
         <!-- Sport & Capacity Tags -->
         <div class="flex flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-3">
             <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
@@ -60,11 +91,18 @@
                     <i class="fas fa-users mr-0.5 sm:mr-1 text-xs"></i> {{ $ground->capacity }}
                 </span>
             @endif
+            @if($ground->available_at_night)
+                <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                    <i class="fas fa-moon mr-0.5 sm:mr-1 text-xs"></i> 
+                    <span class="hidden sm:inline">Night Available</span>
+                    <span class="sm:hidden">🌙</span>
+                </span>
+            @endif
             @if($ground->night_rate_per_hour)
                 <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
-                    <i class="fas fa-moon mr-0.5 sm:mr-1 text-xs"></i> 
-                    <span class="hidden sm:inline">Night</span>
-                    <span class="sm:hidden">🌙</span>
+                    <i class="fas fa-star mr-0.5 sm:mr-1 text-xs"></i> 
+                    <span class="hidden sm:inline">Night Rate</span>
+                    <span class="sm:hidden">⭐</span>
                 </span>
             @endif
         </div>
@@ -74,7 +112,7 @@
             <div class="flex-1">
                 <span class="text-xs text-gray-500 block">Starting at</span>
                 <div class="flex items-baseline">
-                    <span class="text-base sm:text-lg md:text-xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</span>
+                    <span class="text-base sm:text-lg md:text-xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour * 1.03, 0) }}</span>
                     <span class="text-xs sm:text-sm text-gray-500 ml-1">/hr</span>
                 </div>
             </div>

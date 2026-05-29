@@ -210,13 +210,19 @@
                 <div>
                     <div class="field">
                         <div class="field-label">Rate per Hour</div>
-                        <div class="field-value">BTN {{ number_format($booking->ground->rate_per_hour, 2) }}</div>
+                        <div class="field-value">BTN {{ number_format($booking->ground->rate_per_hour * 1.03, 2) }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="field">
                         <div class="field-label">Duration</div>
                         <div class="field-value">{{ $booking->duration_hours }} hours</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="field">
+                        <div class="field-label">Total Amount</div>
+                        <div class="field-value">BTN {{ number_format($booking->total_amount * 1.03, 2) }}</div>
                     </div>
                 </div>
                 <div>

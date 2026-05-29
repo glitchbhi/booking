@@ -277,9 +277,10 @@
                             </div>
                         </div>
                         <div class="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-gray-900">
-                            BTN {{ number_format($ground->rate_per_hour, 0) }}
+                            BTN {{ number_format($ground->rate_per_hour * 1.03, 0) }}
                             <span class="text-xs sm:text-sm font-normal text-gray-500">/ hour</span>
                         </div>
+                        <p class="text-xs text-gray-600 mt-1"><span class="text-gray-400">(+3% admin fee)</span></p>
                     </div>
                     
                     <!-- Night Rate -->
@@ -336,19 +337,19 @@
                 @php
                     $today = \Carbon\Carbon::today();
                     $now = \Carbon\Carbon::now();
-                    $startHour = 6; // 6 AM
-                    // Get end hour from ground's night_rate_end, default to 23 (11 PM)
-                    $endHour = $ground->night_rate_end ? \Carbon\Carbon::parse($ground->night_rate_end)->hour : 23;
+                    // CRITICAL FIX: Use opening_time and closing_time (actual operating hours), NOT pricing times
+                    $startHour = $ground->opening_time ? \Carbon\Carbon::parse($ground->opening_time)->hour : 6; // 6 AM default
+                    $endHour = $ground->closing_time ? \Carbon\Carbon::parse($ground->closing_time)->hour : 23; // 11 PM default
                     
                     // Generate array of hours, handling midnight crossing
                     $hours = [];
                     if ($endHour >= $startHour) {
-                        // Normal case: 6 AM to 11 PM (6 to 23)
+                        // Normal case: e.g., 6 AM to 11 PM (6 to 23)
                         for ($h = $startHour; $h < $endHour; $h++) {
                             $hours[] = $h;
                         }
                     } else {
-                        // Midnight crossing: 6 AM to midnight, then midnight to end hour (e.g., 6 to 24, then 0 to 2)
+                        // Midnight crossing: e.g., 6 AM to midnight, then midnight to end hour (6 to 24, then 0 to 2)
                         for ($h = $startHour; $h < 24; $h++) {
                             $hours[] = $h;
                         }
@@ -509,7 +510,7 @@
                     <div class="bg-white rounded-lg sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-6 h-fit">
                         <div class="text-center mb-4 sm:mb-6">
                             <div class="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">Starting from</div>
-                            <div class="text-3xl sm:text-4xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour, 0) }}</div>
+                            <div class="text-3xl sm:text-4xl font-bold text-gray-900">BTN {{ number_format($ground->rate_per_hour * 1.03, 0) }}</div>
                             <div class="text-xs sm:text-sm text-gray-500 mt-1">per hour</div>
                         </div>
                         
